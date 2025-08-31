@@ -17,10 +17,10 @@ import lombok.*;
 public class UserFollow extends BaseSchema {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "follower_id", nullable = false)
     User follower;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "following_id", nullable = false)
     User following;
 }
