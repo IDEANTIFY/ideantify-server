@@ -8,7 +8,6 @@ import lombok.*;
 @Entity
 @Getter
 @Builder(toBuilder = true)
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class InnerProjectFile extends BaseSchema {
