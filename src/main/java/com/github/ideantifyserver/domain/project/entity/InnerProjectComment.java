@@ -3,6 +3,7 @@ package com.github.ideantifyserver.domain.project.entity;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.List;
 public class InnerProjectComment extends BaseSchema {
 
     @Column(nullable = false)
+    @NotBlank
     String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -24,6 +26,7 @@ public class InnerProjectComment extends BaseSchema {
     InnerProjectComment parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
     List<InnerProjectComment> children = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)

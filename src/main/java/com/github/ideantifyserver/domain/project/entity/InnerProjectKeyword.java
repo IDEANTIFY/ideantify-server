@@ -2,6 +2,7 @@ package com.github.ideantifyserver.domain.project.entity;
 
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Entity
@@ -13,6 +14,7 @@ import lombok.*;
 public class InnerProjectKeyword extends BaseSchema {
 
     @Column(nullable = false)
+    @NotBlank
     String keyword;
 
     @ManyToOne(fetch = FetchType.LAZY)
