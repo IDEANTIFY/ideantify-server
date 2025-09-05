@@ -22,6 +22,6 @@ public class UserSocial extends BaseSchema {
     String instagram;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     User user;
 }
