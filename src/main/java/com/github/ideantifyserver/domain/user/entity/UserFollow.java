@@ -9,7 +9,6 @@ import lombok.*;
 
 @Entity
 @Getter
-@Setter
 @Builder(toBuilder = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
