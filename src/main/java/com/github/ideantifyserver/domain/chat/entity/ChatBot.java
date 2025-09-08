@@ -8,13 +8,13 @@ import lombok.*;
 @Entity
 @Getter
 @Builder(toBuilder = true)
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatBot extends BaseSchema {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    @NotBlank
     ChatBotRole role;
 
     @Column(nullable = false)
