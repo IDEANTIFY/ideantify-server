@@ -11,7 +11,6 @@ import java.util.List;
 @Entity
 @Getter
 @Builder(toBuilder = true)
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class IdeaReportInput extends BaseSchema {
@@ -40,7 +39,7 @@ public class IdeaReportInput extends BaseSchema {
     @NotBlank
     String target;
 
-    @OneToMany(mappedBy = "ideaReportInput", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "input", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     List<IdeaReportResult> ideaReportResults = new ArrayList<>();
 
