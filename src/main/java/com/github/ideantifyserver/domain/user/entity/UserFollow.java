@@ -1,16 +1,20 @@
 package com.github.ideantifyserver.domain.user.entity;
 
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
 
+@Table(
+        uniqueConstraints = @UniqueConstraint(columnNames = {"follower_id", "following_id"}),
+        indexes = {
+                @Index(columnList = "follower_id"),
+                @Index(columnList = "following_id")
+        }
+)
 @Entity
 @Getter
 @Builder(toBuilder = true)
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserFollow extends BaseSchema {
