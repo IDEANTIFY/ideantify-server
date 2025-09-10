@@ -29,5 +29,6 @@ public class Keyword extends BaseSchema {
     Keyword parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
     List<Keyword> children = new ArrayList<>();
 }
