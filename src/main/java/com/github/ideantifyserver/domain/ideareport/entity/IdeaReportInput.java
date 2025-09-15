@@ -1,5 +1,7 @@
 package com.github.ideantifyserver.domain.ideareport.entity;
 
+import com.github.ideantifyserver.domain.keyword.entity.Keyword;
+import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;

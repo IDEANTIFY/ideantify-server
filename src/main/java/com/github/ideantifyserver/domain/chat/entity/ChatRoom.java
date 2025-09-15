@@ -1,6 +1,8 @@
 package com.github.ideantifyserver.domain.chat.entity;
 
 import com.github.ideantifyserver.domain.ideareport.entity.IdeaReportResult;
+import com.github.ideantifyserver.domain.project.entity.InnerProject;
+import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import jakarta.persistence.*;
 import lombok.*;

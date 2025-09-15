@@ -3,6 +3,7 @@ package com.github.ideantifyserver.domain.ideareport.entity;
 import com.github.ideantifyserver.domain.chat.entity.ChatRoom;
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
@@ -16,9 +17,17 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class IdeaReportResult extends BaseSchema {
 
+    @Embedded
+    @Valid
+    EvaluationScores evaluationScores;
+
     @Column(nullable = false)
     @NotBlank
-    String evaluation;
+    Integer totalSimilarCases;
+
+    @Column(nullable = false)
+    @NotBlank
+    String analysisNarrative;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idea_report_input_id", nullable = false)

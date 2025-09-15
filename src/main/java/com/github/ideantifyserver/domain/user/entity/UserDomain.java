@@ -1,6 +1,6 @@
-package com.github.ideantifyserver.domain.project.entity;
+package com.github.ideantifyserver.domain.user.entity;
 
-import com.github.ideantifyserver.domain.user.entity.User;
+import com.github.ideantifyserver.domain.keyword.entity.Keyword;
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,16 +10,15 @@ import lombok.*;
 
 @Entity
 @Getter
-@Builder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class InnerProjectLike extends BaseSchema {
+public class UserDomain extends BaseSchema {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
-    InnerProject project;
+    @JoinColumn(name = "keyword_id", nullable = false)
+    Keyword keyword;
 }

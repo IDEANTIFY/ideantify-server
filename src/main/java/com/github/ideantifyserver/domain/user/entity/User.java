@@ -12,7 +12,6 @@ import java.util.List;
 @Entity
 @Getter
 @Builder(toBuilder = true)
-@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseSchema {
