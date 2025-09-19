@@ -29,8 +29,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         OAuth2UserService<OAuth2UserRequest, OAuth2User> oAuth2UserService = new DefaultOAuth2UserService();
         OAuth2User oAuth2User = oAuth2UserService.loadUser(userRequest);
 
-        System.out.println("Kakao attributes = " + oAuth2User.getAttributes());
-
         // 2. 제공자별 사용자 정보 추출
         OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(
                 userRequest.getClientRegistration().getRegistrationId(),
