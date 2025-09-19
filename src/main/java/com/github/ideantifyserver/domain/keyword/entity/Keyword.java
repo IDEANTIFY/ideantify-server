@@ -4,6 +4,7 @@ import com.github.ideantifyserver.domain.ideareport.entity.IdeaReportInput;
 import com.github.ideantifyserver.domain.user.entity.UserDomain;
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -16,6 +17,10 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class Keyword extends BaseSchema {
 
+    @Column(nullable = false)
+    @NotBlank
+    String name;
+
     @OneToMany(mappedBy = "keyword", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     List<UserDomain> userDomains = new ArrayList<>();
@@ -23,12 +28,4 @@ public class Keyword extends BaseSchema {
     @OneToMany(mappedBy = "keyword", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     List<IdeaReportInput> ideaReportInputs = new ArrayList<>();
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    Keyword parent;
-
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    List<Keyword> children = new ArrayList<>();
 }
