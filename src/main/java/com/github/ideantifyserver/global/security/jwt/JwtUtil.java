@@ -2,11 +2,13 @@ package com.github.ideantifyserver.global.security.jwt;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.global.property.JwtProperty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -42,5 +44,10 @@ public class JwtUtil {
                 .build()
                 .verify(token).getClaim("id")
                 .asString());
+    }
+
+    public String generateToken(User user) {
+
+        return JWT.create().withIssuedAt(Instant.now()).withClaim("id", user.getId().toString()).sign(algorithm());
     }
 }

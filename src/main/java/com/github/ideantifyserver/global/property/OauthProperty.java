@@ -1,19 +1,18 @@
 package com.github.ideantifyserver.global.property;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.validation.annotation.Validated;
 
 @Data
-@Validated
 @Configuration
-@ConfigurationProperties(prefix = "app.jwt")
-public class JwtProperty {
+@ConfigurationProperties(prefix = "app.auth.oauth.callback")
+public class OauthProperty {
 
-    @Size(min = 32)
     @NotBlank
-    String key;
+    private String google;
+
+    @NotBlank
+    private String kakao;
 }

@@ -28,6 +28,4 @@ public class Keyword extends BaseSchema {
     @OneToMany(mappedBy = "keyword", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     List<IdeaReportInput> ideaReportInputs = new ArrayList<>();
-
-
 }
