@@ -22,7 +22,7 @@ public class CreateProjectRequestDto {
 
         List<UUID> member;
 
-        List<String> file;
+        List<String> files;
 
         @NotBlank
         String description;
