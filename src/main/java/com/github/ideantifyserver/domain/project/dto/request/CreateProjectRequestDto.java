@@ -27,7 +27,3 @@ public class CreateProjectRequestDto {
         @NotBlank
         String description;
 }
-
-
-
-
