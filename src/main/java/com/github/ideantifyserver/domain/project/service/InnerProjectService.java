@@ -227,7 +227,7 @@ public class InnerProjectService {
     }
 
     public List<ProjectListResponseDto> getProjectsByUser(UUID userId) {
-        List<InnerProject> projects = innerProjectRepository.findDistinctByMembers_User_Id(userId);
+        List<InnerProject> projects = innerProjectRepository.findAllByMember(userId);
 
         return projects.stream()
                 .map(p -> ProjectListResponseDto.of(
