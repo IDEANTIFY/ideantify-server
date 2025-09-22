@@ -36,11 +36,11 @@ public class InnerProjectService {
                 .description(req.getDescription())
                 .build();
 
-        if (req.getFile().stream().anyMatch(f -> f == null || f.isBlank())) {
+        if (req.getFiles().stream().anyMatch(f -> f == null || f.isBlank())) {
             throw InnerProjectExceptions.INVALID_FILE_PATH.toException();
         }
 
-        Optional.of(req.getFile()).orElseGet(List::of)
+        Optional.of(req.getFiles()).orElseGet(List::of)
                 .forEach(f -> project.getFiles().add(InnerProjectFile.builder()
                         .project(project)
                         .file(f)
@@ -154,5 +154,13 @@ public class InnerProjectService {
                         .map(this::toCommentDto)
                         .toList()
         );
+    }
+
+    @Transactional
+    public void delete(UUID id) {
+        InnerProject project = innerProjectRepository.findById(id)
+                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+
+        innerProjectRepository.delete(project);
     }
 }
