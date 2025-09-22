@@ -15,9 +15,9 @@ public class ProjectResponseDto{
         LocalDateTime updatedAt;
         String image;
         String subject;
-        List<String> keyword;
+        List<String> keywords;
         String github;
-        List<UUID> member;
-        List<String> file;
+        List<UUID> members;
+        List<String> files;
         String description;
 }
