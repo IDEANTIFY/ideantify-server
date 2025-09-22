@@ -6,6 +6,7 @@ import com.github.ideantifyserver.domain.project.dto.request.CreateProjectReques
 import com.github.ideantifyserver.domain.project.dto.request.UpdateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.response.CommentResponseDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectDetailResponseDto;
+import com.github.ideantifyserver.domain.project.dto.response.ProjectListResponseDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectResponseDto;
 import com.github.ideantifyserver.domain.project.entity.*;
 import com.github.ideantifyserver.domain.project.exception.InnerProjectExceptions;
@@ -223,5 +224,23 @@ public class InnerProjectService {
                 .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
 
         innerProjectRepository.delete(project);
+    }
+
+    public List<ProjectListResponseDto> getProjectsByUser(UUID userId) {
+        List<InnerProject> projects = innerProjectRepository.findDistinctByMembers_User_Id(userId);
+
+        return projects.stream()
+                .map(p -> ProjectListResponseDto.of(
+                        p.getId(),
+                        p.getImage(),
+                        p.getSubject(),
+                        p.getKeywords().stream()
+                                .map(k -> k.getKeyword().getName())
+                                .toList(),
+                        p.getMembers().stream()
+                                .map(m -> m.getUser().getId())
+                                .toList()
+                ))
+                .toList();
     }
 }
