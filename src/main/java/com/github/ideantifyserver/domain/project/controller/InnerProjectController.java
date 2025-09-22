@@ -33,7 +33,7 @@ public class InnerProjectController {
         return ApiResponse.ok(innerProjectService.getProject(projectId));
     }
 
-    @DeleteMapping("/{projectID}")
+    @DeleteMapping("/{projectId}")
     @Operation(summary = "프로젝트 삭제")
     public ApiResponse<Void> deleteProject(@PathVariable UUID projectId) {
         innerProjectService.delete(projectId);
