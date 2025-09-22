@@ -3,23 +3,20 @@ package com.github.ideantifyserver.domain.project.service;
 import com.github.ideantifyserver.domain.keyword.entity.Keyword;
 import com.github.ideantifyserver.domain.keyword.repository.KeywordRepository;
 import com.github.ideantifyserver.domain.project.dto.request.CreateProjectRequestDto;
+import com.github.ideantifyserver.domain.project.dto.response.CommentResponseDto;
+import com.github.ideantifyserver.domain.project.dto.response.ProjectDetailResponseDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectResponseDto;
-import com.github.ideantifyserver.domain.project.entity.InnerProject;
-import com.github.ideantifyserver.domain.project.entity.InnerProjectFile;
-import com.github.ideantifyserver.domain.project.entity.InnerProjectKeyword;
-import com.github.ideantifyserver.domain.project.entity.InnerProjectMember;
+import com.github.ideantifyserver.domain.project.entity.*;
 import com.github.ideantifyserver.domain.project.exception.InnerProjectExceptions;
 import com.github.ideantifyserver.domain.project.repository.InnerProjectRepository;
+import com.github.ideantifyserver.domain.user.dto.response.UserResponseDto;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -113,5 +110,49 @@ public class InnerProjectService {
             keywordRepository.saveAll(toCreate).forEach(k -> byName.put(k.getName(), k));
         }
         return byName;
+    }
+
+    public ProjectDetailResponseDto getProject(UUID id) {
+        InnerProject project = innerProjectRepository.findById(id)
+                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+
+        return ProjectDetailResponseDto.of(
+                project.getId(),
+                project.getCreatedAt(),
+                project.getUpdatedAt(),
+                project.getImage(),
+                project.getSubject(),
+                project.getKeywords().stream()
+                        .map(k -> k.getKeyword().getName())
+                        .toList(),
+                project.getGithub(),
+                project.getMembers().stream()
+                        .map(m -> m.getUser().getId())
+                        .toList(),
+                project.getFiles().stream()
+                        .map(InnerProjectFile::getFile)
+                        .toList(),
+                project.getDescription(),
+                project.getComments().stream()
+                        .map(this::toCommentDto)
+                        .toList()
+        );
+    }
+
+    private CommentResponseDto toCommentDto(InnerProjectComment comment) {
+        return CommentResponseDto.of(
+                comment.getId(),
+                comment.getCreatedAt(),
+                comment.getUpdatedAt(),
+                UserResponseDto.of(
+                        comment.getUser().getId(),
+                        comment.getUser().getNickname(),
+                        comment.getUser().getAvatar()
+                ),
+                comment.getContent(),
+                comment.getChildren().stream()
+                        .map(this::toCommentDto)
+                        .toList()
+        );
     }
 }
