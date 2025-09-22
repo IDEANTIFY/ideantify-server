@@ -19,4 +19,6 @@ public class InnerProjectKeyword extends BaseSchema {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "keyword_id", nullable = false)
     Keyword keyword;
+
+    public void setProject(InnerProject p) { this.project = p; }
 }

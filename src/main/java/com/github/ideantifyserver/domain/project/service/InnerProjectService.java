@@ -3,6 +3,7 @@ package com.github.ideantifyserver.domain.project.service;
 import com.github.ideantifyserver.domain.keyword.entity.Keyword;
 import com.github.ideantifyserver.domain.keyword.repository.KeywordRepository;
 import com.github.ideantifyserver.domain.project.dto.request.CreateProjectRequestDto;
+import com.github.ideantifyserver.domain.project.dto.request.UpdateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.response.CommentResponseDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectDetailResponseDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectResponseDto;
@@ -153,6 +154,66 @@ public class InnerProjectService {
                 comment.getChildren().stream()
                         .map(this::toCommentDto)
                         .toList()
+        );
+    }
+
+    @Transactional
+    public ProjectResponseDto update(UUID id, UpdateProjectRequestDto req) {
+        InnerProject project = innerProjectRepository.findById(id)
+                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+
+        project.updateBasics(req.getImage(), req.getSubject(), req.getGithub(), req.getDescription());
+
+        List<String> files = Optional.ofNullable(req.getFiles()).orElseGet(List::of);
+        if (files.stream().anyMatch(f -> f == null || f.isBlank())) {
+            throw InnerProjectExceptions.INVALID_FILE_PATH.toException();
+        }
+        List<InnerProjectFile> newFiles = files.stream()
+                .map(f -> InnerProjectFile.builder().file(f).build())
+                .toList();
+        project.updateFiles(newFiles);
+
+        List<UUID> memberIds = Optional.ofNullable(req.getMembers()).orElseGet(List::of);
+        if (memberIds.stream().anyMatch(Objects::isNull)) {
+            throw InnerProjectExceptions.INVALID_MEMBER_ID.toException();
+        }
+        List<InnerProjectMember> newMembers = memberIds.stream()
+                .map(i -> userRepository.findById(i)
+                        .orElseThrow(InnerProjectExceptions.INVALID_MEMBER_ID::toException))
+                .map(u -> InnerProjectMember.builder().user(u).build())
+                .toList();
+        project.updateMembers(newMembers);
+
+        List<String> names = Optional.ofNullable(req.getKeywords()).orElseGet(List::of).stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .distinct()
+                .toList();
+
+        if (names.isEmpty() && req.getKeywords() != null && !req.getKeywords().isEmpty()) {
+            throw InnerProjectExceptions.INVALID_KEYWORD.toException();
+        }
+
+        Map<String, Keyword> keywordMap = ensureKeywords(names);
+        List<InnerProjectKeyword> newKeywords = names.stream()
+                .map(k -> InnerProjectKeyword.builder()
+                        .keyword(keywordMap.get(k))
+                        .build())
+                .toList();
+        project.updateKeywords(newKeywords);
+
+        return ProjectResponseDto.of(
+                project.getId(),
+                project.getCreatedAt(),
+                project.getUpdatedAt(),
+                project.getImage(),
+                project.getSubject(),
+                project.getKeywords().stream().map(k -> k.getKeyword().getName()).toList(),
+                project.getGithub(),
+                project.getMembers().stream().map(m -> m.getUser().getId()).toList(),
+                project.getFiles().stream().map(InnerProjectFile::getFile).toList(),
+                project.getDescription()
         );
     }
 

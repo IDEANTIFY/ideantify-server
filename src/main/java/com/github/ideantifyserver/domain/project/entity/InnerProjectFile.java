@@ -18,4 +18,6 @@ public class InnerProjectFile extends BaseSchema {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     InnerProject project;
+
+    public void setProject(InnerProject p) { this.project = p; }
 }
