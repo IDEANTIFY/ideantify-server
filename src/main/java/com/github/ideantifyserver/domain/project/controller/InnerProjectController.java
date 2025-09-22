@@ -1,6 +1,7 @@
 package com.github.ideantifyserver.domain.project.controller;
 
 import com.github.ideantifyserver.domain.project.dto.request.CreateProjectRequestDto;
+import com.github.ideantifyserver.domain.project.dto.request.UpdateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectDetailResponseDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectResponseDto;
 import com.github.ideantifyserver.domain.project.service.InnerProjectService;
@@ -31,6 +32,12 @@ public class InnerProjectController {
     @Operation(summary = "프로젝트 조회")
     public ApiResponse<ProjectDetailResponseDto> getProject(@PathVariable UUID projectId) {
         return ApiResponse.ok(innerProjectService.getProject(projectId));
+    }
+
+    @PutMapping("/{projectId}")
+    @Operation(summary = "프로젝트 수정")
+    public ApiResponse<ProjectResponseDto> updateProject(@PathVariable UUID projectId, @RequestBody @Valid UpdateProjectRequestDto req) {
+        return ApiResponse.ok(innerProjectService.update(projectId, req));
     }
 
     @DeleteMapping("/{projectId}")
