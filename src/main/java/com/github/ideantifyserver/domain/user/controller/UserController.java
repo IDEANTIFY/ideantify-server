@@ -1,9 +1,9 @@
 package com.github.ideantifyserver.domain.user.controller;
 
 import com.github.ideantifyserver.domain.user.dto.response.UserResponse;
-import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.service.UserService;
 import com.github.ideantifyserver.global.response.ApiResponse;
+import com.github.ideantifyserver.global.security.oauth.CustomOAuth2UserDetails;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,9 @@ public class UserController {
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     @Operation(description = "내 정보 조회")
-    public ApiResponse<UserResponse> getMyProfile(@AuthenticationPrincipal User user) {
+    public ApiResponse<UserResponse> getMyProfile(
+            @AuthenticationPrincipal CustomOAuth2UserDetails user
+    ) {
 
         return ApiResponse.ok(userService.getMyProfile(user));
     }
