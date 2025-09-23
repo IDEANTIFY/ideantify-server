@@ -6,11 +6,13 @@ import com.github.ideantifyserver.domain.project.dto.response.ProjectDetailRespo
 import com.github.ideantifyserver.domain.project.dto.response.ProjectListResponseDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectResponseDto;
 import com.github.ideantifyserver.domain.project.service.InnerProjectService;
+import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,8 +28,11 @@ public class InnerProjectController {
 
     @PostMapping
     @Operation(summary = "프로젝트 등록")
-    public ApiResponse<ProjectResponseDto> createProject(@RequestBody @Valid CreateProjectRequestDto req) {
-        return ApiResponse.ok(innerProjectService.create(req));
+    public ApiResponse<ProjectResponseDto> createProject(
+            @RequestBody @Valid CreateProjectRequestDto req,
+            @AuthenticationPrincipal User user
+    ) {
+        return ApiResponse.ok(innerProjectService.create(req, user));
     }
 
     @GetMapping("/{projectId}")
@@ -46,14 +51,21 @@ public class InnerProjectController {
 
     @PutMapping("/{projectId}")
     @Operation(summary = "프로젝트 수정")
-    public ApiResponse<ProjectResponseDto> updateProject(@PathVariable UUID projectId, @RequestBody @Valid UpdateProjectRequestDto req) {
-        return ApiResponse.ok(innerProjectService.update(projectId, req));
+    public ApiResponse<ProjectResponseDto> updateProject(
+            @PathVariable UUID projectId,
+            @RequestBody @Valid UpdateProjectRequestDto req,
+            @AuthenticationPrincipal User user
+    ) {
+        return ApiResponse.ok(innerProjectService.update(projectId, req, user));
     }
 
     @DeleteMapping("/{projectId}")
     @Operation(summary = "프로젝트 삭제")
-    public ApiResponse<Void> deleteProject(@PathVariable UUID projectId) {
-        innerProjectService.delete(projectId);
+    public ApiResponse<Void> deleteProject(
+            @PathVariable UUID projectId,
+            @AuthenticationPrincipal User user
+    ) {
+        innerProjectService.delete(projectId, user);
         return ApiResponse.ok();
     }
 }

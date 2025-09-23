@@ -21,4 +21,5 @@ public class ProjectDetailResponseDto {
     List<String> files;
     String description;
     List<CommentResponseDto> comments;
+    UUID ownerId;
 }

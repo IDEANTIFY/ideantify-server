@@ -30,7 +30,7 @@ public class InnerProjectService {
     private final UserRepository userRepository;
 
     @Transactional
-    public ProjectResponseDto create(CreateProjectRequestDto req) {
+    public ProjectResponseDto create(CreateProjectRequestDto req, User me) {
         InnerProject project = InnerProject.builder()
                 .image(req.getImage())
                 .subject(req.getSubject())
@@ -49,18 +49,26 @@ public class InnerProjectService {
                         .build())
                 );
 
-        if (req.getMember().stream().anyMatch(Objects::isNull)) {
-            throw InnerProjectExceptions.INVALID_MEMBER_ID.toException();
-        }
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
 
-        Optional.of(req.getMember()).orElseGet(List::of)
-                .forEach(m -> {
-                            User user = userRepository.findById(m).orElseThrow(InnerProjectExceptions.INVALID_MEMBER_ID::toException);
-                            project.getMembers().add(InnerProjectMember.builder()
-                                    .project(project)
-                                    .user(user)
-                                    .build());
-                });
+        Set<UUID> memberIds = new HashSet<>(Optional.ofNullable(req.getMember()).orElseGet(List::of));
+        memberIds.add(me.getId());
+
+        List<User> users = memberIds.stream()
+                .map(id -> Optional.ofNullable(id)
+                        .flatMap(userRepository::findById)
+                        .orElseThrow(InnerProjectExceptions.INVALID_MEMBER_ID::toException))
+                .toList();
+
+        for (User u : users) {
+            project.getMembers().add(
+                    InnerProjectMember.builder()
+                            .project(project)
+                            .user(u)
+                            .isOwner(u.getId().equals(me.getId()))
+                            .build()
+            );
+        }
 
         List<String> names = Optional.ofNullable(req.getKeyword()).orElseGet(List::of).stream()
                 .filter(Objects::nonNull)
@@ -118,6 +126,12 @@ public class InnerProjectService {
         InnerProject project = innerProjectRepository.findById(id)
                 .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
 
+        UUID ownerId = project.getMembers().stream()
+                .filter(m -> Boolean.TRUE.equals(m.getIsOwner()))
+                .map(m -> m.getUser().getId())
+                .findFirst()
+                .orElseThrow(InnerProjectExceptions.OWNER_NOT_FOUND::toException);
+
         return ProjectDetailResponseDto.of(
                 project.getId(),
                 project.getCreatedAt(),
@@ -137,7 +151,8 @@ public class InnerProjectService {
                 project.getDescription(),
                 project.getComments().stream()
                         .map(this::toCommentDto)
-                        .toList()
+                        .toList(),
+                ownerId
         );
     }
 
@@ -159,9 +174,21 @@ public class InnerProjectService {
     }
 
     @Transactional
-    public ProjectResponseDto update(UUID id, UpdateProjectRequestDto req) {
+    public ProjectResponseDto update(UUID id, UpdateProjectRequestDto req, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
         InnerProject project = innerProjectRepository.findById(id)
                 .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+
+        UUID ownerId = project.getMembers().stream()
+                .filter(m -> Boolean.TRUE.equals(m.getIsOwner()))
+                .map(m -> m.getUser().getId())
+                .findFirst()
+                .orElseThrow(InnerProjectExceptions.OWNER_NOT_FOUND::toException);
+
+        if (!ownerId.equals(me.getId())) {
+            throw InnerProjectExceptions.NOT_OWNER.toException();
+        }
 
         project.updateBasics(req.getImage(), req.getSubject(), req.getGithub(), req.getDescription());
 
@@ -174,14 +201,17 @@ public class InnerProjectService {
                 .toList();
         project.updateFiles(newFiles);
 
-        List<UUID> memberIds = Optional.ofNullable(req.getMembers()).orElseGet(List::of);
-        if (memberIds.stream().anyMatch(Objects::isNull)) {
-            throw InnerProjectExceptions.INVALID_MEMBER_ID.toException();
-        }
+        Set<UUID> memberIds = new HashSet<>(Optional.ofNullable(req.getMembers()).orElseGet(List::of));
+        memberIds.add(ownerId);
+
         List<InnerProjectMember> newMembers = memberIds.stream()
-                .map(i -> userRepository.findById(i)
+                .map(idOpt -> Optional.ofNullable(idOpt)
+                        .flatMap(userRepository::findById)
                         .orElseThrow(InnerProjectExceptions.INVALID_MEMBER_ID::toException))
-                .map(u -> InnerProjectMember.builder().user(u).build())
+                .map(u -> InnerProjectMember.builder()
+                        .user(u)
+                        .isOwner(u.getId().equals(ownerId))
+                        .build())
                 .toList();
         project.updateMembers(newMembers);
 
@@ -219,9 +249,21 @@ public class InnerProjectService {
     }
 
     @Transactional
-    public void delete(UUID id) {
+    public void delete(UUID id, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
         InnerProject project = innerProjectRepository.findById(id)
                 .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+
+        UUID ownerId = project.getMembers().stream()
+                .filter(m -> Boolean.TRUE.equals(m.getIsOwner()))
+                .map(m -> m.getUser().getId())
+                .findFirst()
+                .orElseThrow(InnerProjectExceptions.OWNER_NOT_FOUND::toException);
+
+        if (!ownerId.equals(me.getId())) {
+            throw InnerProjectExceptions.NOT_OWNER.toException();
+        }
 
         innerProjectRepository.delete(project);
     }
