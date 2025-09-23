@@ -1,3 +1,6 @@
+server:
+  servlet:
+    context-path: /api
 spring:
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:ideantify}
@@ -7,6 +10,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    open-in-view: true
   sql:
     init:
       mode: always
@@ -45,9 +49,9 @@ app:
       callback:
         google: ${GOOGLE_CALLBACK_URL}
         kakao: ${KAKAO_CALLBACK_URL}
-logging:
-  level:
-    org.springframework.security: TRACE
-    org.springframework.security.oauth2: TRACE
-    org.springframework.web.client.RestTemplate: DEBUG
-    org.apache.http: DEBUG
+#logging:
+#  level:
+#    org.springframework.security: TRACE
+#    org.springframework.security.oauth2: TRACE
+#    org.springframework.web.client.RestTemplate: DEBUG
+#    org.apache.http: DEBUG

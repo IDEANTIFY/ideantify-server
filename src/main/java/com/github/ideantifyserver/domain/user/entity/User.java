@@ -1,5 +1,6 @@
 package com.github.ideantifyserver.domain.user.entity;
 
+import com.github.ideantifyserver.domain.project.entity.InnerProjectMember;
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
@@ -42,4 +43,8 @@ public class User extends BaseSchema {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     UserSocial social;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
+    List<InnerProjectMember> projects = new ArrayList<>();
 }
