@@ -20,5 +20,7 @@ public class InnerProjectMember extends BaseSchema {
     @JoinColumn(name = "project_id", nullable = false)
     InnerProject project;
 
+    Boolean isOwner;
+
     public void setProject(InnerProject p) { this.project = p; }
 }
