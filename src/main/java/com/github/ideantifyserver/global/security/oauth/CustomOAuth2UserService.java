@@ -2,10 +2,11 @@ package com.github.ideantifyserver.global.security.oauth;
 
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.entity.UserProvider;
+import com.github.ideantifyserver.domain.user.entity.UserSocial;
 import com.github.ideantifyserver.domain.user.repository.UserProviderRepository;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
+import com.github.ideantifyserver.domain.user.repository.UserSocialRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -20,6 +21,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
     private final UserRepository userRepository;
     private final UserProviderRepository userProviderRepository;
+    private final UserSocialRepository userSocialRepository;
 
     @Override
     @Transactional
@@ -38,21 +40,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         User user = userRepository.findByEmail(oAuth2UserInfo.getEmail())
                 .orElseGet(() -> createUserWithProvider(oAuth2UserInfo));
 
-        // 4. Lazy 로딩 필드 초기화
-        initializeUserFields(user);
-
         return new CustomOAuth2UserDetails(user, oAuth2User.getAttributes());
-    }
-
-    private void initializeUserFields(User user) {
-
-        Hibernate.initialize(user.getProviders());
-        Hibernate.initialize(user.getFollowers());
-        Hibernate.initialize(user.getFollowings());
-
-        if (user.getSocial() != null) {
-            Hibernate.initialize(user.getSocial());
-        }
     }
 
     private User createUserWithProvider(OAuth2UserInfo oAuth2UserInfo) {
@@ -68,6 +56,8 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .provider(UserProvider.Provider.valueOf(oAuth2UserInfo.getProvider().toUpperCase()))
                 .user(user)
                 .build());
+
+        userSocialRepository.save(UserSocial.builder().user(user).build());
 
         return user;
     }

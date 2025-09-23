@@ -6,13 +6,13 @@ import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.global.property.JwtProperty;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
-@Configuration
+@Component
 @RequiredArgsConstructor
 public class JwtUtil {
 
