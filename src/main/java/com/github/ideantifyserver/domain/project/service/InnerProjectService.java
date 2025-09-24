@@ -15,6 +15,7 @@ import com.github.ideantifyserver.domain.project.specification.InnerProjectSpeci
 import com.github.ideantifyserver.domain.user.dto.response.UserResponseDto;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
+import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -153,11 +154,11 @@ public class InnerProjectService {
                         p.getSubject(),
                         p.getKeywords().stream()
                                 .map(InnerProjectKeyword::getKeyword)
-                                .map(k -> k.getName())
+                                .map(Keyword::getName)
                                 .toList(),
                         p.getMembers().stream()
                                 .map(InnerProjectMember::getUser)
-                                .map(u -> u.getId())
+                                .map(BaseSchema::getId)
                                 .toList()
                 ))
                 .toList();
