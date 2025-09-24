@@ -56,7 +56,7 @@ public class InnerProjectService {
 
         if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
 
-        Set<UUID> memberIds = new HashSet<>(Optional.ofNullable(req.getMember()).orElseGet(List::of));
+        Set<UUID> memberIds = new HashSet<>(Optional.ofNullable(req.getMembers()).orElseGet(List::of));
         memberIds.add(me.getId());
 
         List<User> users = memberIds.stream()
@@ -75,7 +75,7 @@ public class InnerProjectService {
             );
         }
 
-        List<String> names = Optional.ofNullable(req.getKeyword()).orElseGet(List::of).stream()
+        List<String> names = Optional.ofNullable(req.getKeywords()).orElseGet(List::of).stream()
                 .filter(Objects::nonNull)
                 .map(String::trim)
                 .filter(s -> !s.isBlank())

@@ -16,11 +16,11 @@ public class CreateProjectRequestDto {
         @NotBlank
         String subject;
 
-        List<String> keyword;
+        List<String> keywords;
 
         String github;
 
-        List<UUID> member;
+        List<UUID> members;
 
         List<String> files;
 
