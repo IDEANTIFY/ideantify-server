@@ -12,6 +12,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +36,18 @@ public class InnerProjectController {
             @AuthenticationPrincipal User user
     ) {
         return ApiResponse.ok(innerProjectService.create(req, user));
+    }
+
+    @GetMapping("/list")
+    @Operation(summary = "전체 프로젝트 목록 조회")
+    public ApiResponse<List<ProjectListResponseDto>> getProjectList(
+            @RequestParam(defaultValue = "false") boolean bookmark,
+            @RequestParam(defaultValue = "false") boolean like,
+            @RequestParam(defaultValue = "false") boolean own,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal User user
+    ) {
+        return ApiResponse.ok(innerProjectService.getProjectList(bookmark, like, own, pageable, user));
     }
 
     @GetMapping("/{projectId}")

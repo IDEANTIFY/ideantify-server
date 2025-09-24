@@ -11,10 +11,14 @@ import com.github.ideantifyserver.domain.project.dto.response.ProjectResponseDto
 import com.github.ideantifyserver.domain.project.entity.*;
 import com.github.ideantifyserver.domain.project.exception.InnerProjectExceptions;
 import com.github.ideantifyserver.domain.project.repository.InnerProjectRepository;
+import com.github.ideantifyserver.domain.project.specification.InnerProjectSpecifications;
 import com.github.ideantifyserver.domain.user.dto.response.UserResponseDto;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,6 +124,43 @@ public class InnerProjectService {
             keywordRepository.saveAll(toCreate).forEach(k -> byName.put(k.getName(), k));
         }
         return byName;
+    }
+
+    public List<ProjectListResponseDto> getProjectList(
+            boolean bookmarked,
+            boolean liked,
+            boolean owned,
+            Pageable pageable,
+            User me
+    ) {
+        Specification<InnerProject> specification = Specification.allOf();
+        if (bookmarked) {
+            specification = specification.and(InnerProjectSpecifications.bookmarkedBy(me.getId()));
+        }
+        if (liked) {
+            specification = specification.and(InnerProjectSpecifications.likedBy(me.getId()));
+        }
+        if (owned) {
+            specification = specification.and(InnerProjectSpecifications.memberOf(me.getId()));
+        }
+
+        Page<InnerProject> page = innerProjectRepository.findAll(specification, pageable);
+
+        return page.stream()
+                .map(p -> ProjectListResponseDto.of(
+                        p.getId(),
+                        p.getImage(),
+                        p.getSubject(),
+                        p.getKeywords().stream()
+                                .map(InnerProjectKeyword::getKeyword)
+                                .map(k -> k.getName())
+                                .toList(),
+                        p.getMembers().stream()
+                                .map(InnerProjectMember::getUser)
+                                .map(u -> u.getId())
+                                .toList()
+                ))
+                .toList();
     }
 
     public ProjectDetailResponseDto getProject(UUID id) {
