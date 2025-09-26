@@ -43,12 +43,12 @@ public class InnerProjectService {
                 .description(req.getDescription())
                 .build();
 
-        if (req.getFiles().stream().anyMatch(f -> f == null || f.isBlank())) {
+        List<String> files = Optional.ofNullable(req.getFiles()).orElseGet(List::of);
+        if (files.stream().anyMatch(f -> f == null || f.isBlank())) {
             throw InnerProjectExceptions.INVALID_FILE_PATH.toException();
         }
 
-        Optional.of(req.getFiles()).orElseGet(List::of)
-                .forEach(f -> project.getFiles().add(InnerProjectFile.builder()
+        files.forEach(f -> project.getFiles().add(InnerProjectFile.builder()
                         .project(project)
                         .file(f)
                         .build())
