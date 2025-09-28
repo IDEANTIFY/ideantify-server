@@ -7,6 +7,6 @@ import java.util.UUID;
 
 public interface InnerProjectLikeRepository extends JpaRepository<InnerProjectLike, UUID> {
     boolean existsByProject_IdAndUser_Id(UUID projectId, UUID userId);
-    Long countByProject_Id(UUID projectId);
-    void deleteByProject_IdAndUser_Id(UUID projectId, UUID userId);
+    long countByProject_Id(UUID projectId);
+    long deleteByProject_IdAndUser_Id(UUID projectId, UUID userId);
 }

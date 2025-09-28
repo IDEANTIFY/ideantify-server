@@ -361,13 +361,12 @@ public class InnerProjectService {
         innerProjectRepository.findById(projectId)
                 .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
 
-        if (!innerProjectLikeRepository.existsByProject_IdAndUser_Id(projectId, me.getId())) {
+        if (innerProjectLikeRepository.deleteByProject_IdAndUser_Id(projectId, me.getId()) == 0) {
             throw InnerProjectExceptions.NOT_LIKED.toException();
         }
 
-        innerProjectLikeRepository.deleteByProject_IdAndUser_Id(projectId, me.getId());
+        long count = innerProjectLikeRepository.countByProject_Id(projectId);
 
-        Long count = innerProjectLikeRepository.countByProject_Id(projectId);
         return ProjectLikeResponseDto.of(false, count);
     }
 }

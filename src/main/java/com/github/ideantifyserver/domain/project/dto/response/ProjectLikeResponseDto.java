@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor(staticName = "of")
 public class ProjectLikeResponseDto {
-    Boolean liked;
-    Long likesCount;
+    boolean liked;
+    long likesCount;
 }
