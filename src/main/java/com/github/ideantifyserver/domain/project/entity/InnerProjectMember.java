@@ -19,4 +19,8 @@ public class InnerProjectMember extends BaseSchema {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     InnerProject project;
+
+    Boolean isOwner;
+
+    public void setProject(InnerProject p) { this.project = p; }
 }

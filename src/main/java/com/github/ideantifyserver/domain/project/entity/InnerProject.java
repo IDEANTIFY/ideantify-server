@@ -53,4 +53,35 @@ public class InnerProject extends BaseSchema {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     List<InnerProjectComment> comments = new ArrayList<>();
+
+    public void updateBasics(String image, String subject, String github, String description) {
+        this.image = image;
+        this.subject = subject;
+        this.github = github;
+        this.description = description;
+    }
+
+    public void updateFiles(List<InnerProjectFile> newFiles) {
+        this.files.clear();
+        for (InnerProjectFile f : newFiles) {
+            f.setProject(this);
+            this.files.add(f);
+        }
+    }
+
+    public void updateMembers(List<InnerProjectMember> newMembers) {
+        this.members.clear();
+        for (InnerProjectMember m : newMembers) {
+            m.setProject(this);
+            this.members.add(m);
+        }
+    }
+
+    public void updateKeywords(List<InnerProjectKeyword> newKeywords) {
+        this.keywords.clear();
+        for (InnerProjectKeyword k : newKeywords) {
+            k.setProject(this);
+            this.keywords.add(k);
+        }
+    }
 }
