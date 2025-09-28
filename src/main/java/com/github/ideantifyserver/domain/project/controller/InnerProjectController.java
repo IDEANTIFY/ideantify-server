@@ -93,4 +93,13 @@ public class InnerProjectController {
     ) {
         return ApiResponse.ok(innerProjectService.likeProject(projectId, user));
     }
+
+    @DeleteMapping("/{projectId}/like")
+    @Operation(summary = "프로젝트 좋아요 삭제")
+    public ApiResponse<ProjectLikeResponseDto> unlikeProject(
+            @PathVariable UUID projectId,
+            @AuthenticationPrincipal User user
+    ) {
+        return ApiResponse.ok(innerProjectService.unlikeProject(projectId, user));
+    }
 }

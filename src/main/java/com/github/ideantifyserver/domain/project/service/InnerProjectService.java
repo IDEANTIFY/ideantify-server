@@ -353,4 +353,21 @@ public class InnerProjectService {
         Long count = innerProjectLikeRepository.countByProject_Id(projectId);
         return ProjectLikeResponseDto.of(true, count);
     }
+
+    @Transactional
+    public ProjectLikeResponseDto unlikeProject(UUID projectId, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
+        innerProjectRepository.findById(projectId)
+                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+
+        if (!innerProjectLikeRepository.existsByProject_IdAndUser_Id(projectId, me.getId())) {
+            throw InnerProjectExceptions.NOT_LIKED.toException();
+        }
+
+        innerProjectLikeRepository.deleteByProject_IdAndUser_Id(projectId, me.getId());
+
+        Long count = innerProjectLikeRepository.countByProject_Id(projectId);
+        return ProjectLikeResponseDto.of(false, count);
+    }
 }
