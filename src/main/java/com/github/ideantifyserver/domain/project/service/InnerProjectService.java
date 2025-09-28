@@ -368,6 +368,6 @@ public class InnerProjectService {
 
         long count = innerProjectBookmarkRepository.countByProject_Id(projectId);
 
-        return ProjectBookmarkResponseDto.of(true, count);
+        return ProjectBookmarkResponseDto.of(false, count);
     }
 }
