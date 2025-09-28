@@ -93,4 +93,13 @@ public class InnerProjectController {
     ) {
         return ApiResponse.ok(innerProjectService.bookmarkProject(projectId, user));
     }
+
+    @DeleteMapping("/{projectId}/bookmark")
+    @Operation(summary = "북마크 삭제")
+    public ApiResponse<ProjectBookmarkResponseDto> unbookmarkProject(
+            @PathVariable UUID projectId,
+            @AuthenticationPrincipal User user
+    ) {
+        return ApiResponse.ok(innerProjectService.unbookmarkProject(projectId, user));
+    }
 }

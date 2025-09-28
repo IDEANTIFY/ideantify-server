@@ -354,4 +354,20 @@ public class InnerProjectService {
 
         return ProjectBookmarkResponseDto.of(true, count);
     }
+
+    @Transactional
+    public ProjectBookmarkResponseDto unbookmarkProject(UUID projectId, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
+        innerProjectRepository.findById(projectId)
+                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+
+        if (innerProjectBookmarkRepository.deleteByProject_IdAndUser_Id(projectId, me.getId()) == 0) {
+            throw InnerProjectExceptions.NOT_BOOKMARKED.toException();
+        }
+
+        long count = innerProjectBookmarkRepository.countByProject_Id(projectId);
+
+        return ProjectBookmarkResponseDto.of(true, count);
+    }
 }
