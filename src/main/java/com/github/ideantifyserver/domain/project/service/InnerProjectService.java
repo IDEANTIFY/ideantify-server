@@ -350,7 +350,7 @@ public class InnerProjectService {
             throw InnerProjectExceptions.ALREADY_LIKED.toException();
         }
 
-        Long count = innerProjectLikeRepository.countByProject_Id(projectId);
+        long count = innerProjectLikeRepository.countByProject_Id(projectId);
         return ProjectLikeResponseDto.of(true, count);
     }
 
