@@ -3,6 +3,7 @@ package com.github.ideantifyserver.domain.project.controller;
 import com.github.ideantifyserver.domain.project.dto.request.CreateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.request.UpdateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectDetailResponseDto;
+import com.github.ideantifyserver.domain.project.dto.response.ProjectLikeResponseDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectListResponseDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectResponseDto;
 import com.github.ideantifyserver.domain.project.service.InnerProjectService;
@@ -82,5 +83,14 @@ public class InnerProjectController {
     ) {
         innerProjectService.delete(projectId, user);
         return ApiResponse.ok();
+    }
+
+    @PostMapping("/{projectId}/like")
+    @Operation(summary = "프로젝트 좋아요 추가")
+    public ApiResponse<ProjectLikeResponseDto> likeProject(
+            @PathVariable UUID projectId,
+            @AuthenticationPrincipal User user
+    ) {
+        return ApiResponse.ok(innerProjectService.likeProject(projectId, user));
     }
 }
