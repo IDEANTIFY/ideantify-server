@@ -35,4 +35,8 @@ public class InnerProjectComment extends BaseSchema {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     InnerProject project;
+
+    public void updateContent(@NotBlank String content) {
+        this.content = content;
+    }
 }

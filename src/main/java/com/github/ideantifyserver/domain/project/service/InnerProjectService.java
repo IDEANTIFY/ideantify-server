@@ -373,4 +373,30 @@ public class InnerProjectService {
                 comment.getContent()
         );
     }
+
+    @Transactional
+    public CreatedCommentResponseDto updateComment(UUID projectId, UUID commentId, CreateCommentRequestDto req, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
+        InnerProjectComment comment = innerProjectCommentRepository.findByIdAndProject_Id(commentId, projectId)
+                .orElseThrow(InnerProjectExceptions.COMMENT_NOT_FOUND::toException);
+
+        if (!comment.getUser().getId().equals(me.getId())) {
+            throw InnerProjectExceptions.COMMENT_NOT_OWNER.toException();
+        }
+
+        comment.updateContent(req.getContent());
+
+        return CreatedCommentResponseDto.of(
+                comment.getId(),
+                comment.getCreatedAt(),
+                comment.getUpdatedAt(),
+                CommentUserDto.of(
+                        comment.getUser().getId(),
+                        comment.getUser().getNickname(),
+                        comment.getUser().getAvatar()
+                ),
+                comment.getContent()
+        );
+    }
 }

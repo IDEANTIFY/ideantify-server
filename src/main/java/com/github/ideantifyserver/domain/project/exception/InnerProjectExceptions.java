@@ -15,6 +15,8 @@ public enum InnerProjectExceptions implements ApiExceptionCode {
     OWNER_NOT_FOUND("INNERPROJECT_006", "작성자를 찾을 수 없습니다."),
     NOT_OWNER("INNERPROJECT_007", "해당 프로젝트의 작성자가 아닙니다."),
     COMMENT_PARENT_NOT_FOUND("INNERPROJECT_012", "부모 댓글을 찾을 수 없습니다."),
+    COMMENT_NOT_FOUND("INNERPROJECT_013", "해당 댓글을 찾을 수 없습니다."),
+    COMMENT_NOT_OWNER("INNERPROJECT_014", "해당 댓글의 작성자가 아닙니다."),
     ;
 
     private final String code;

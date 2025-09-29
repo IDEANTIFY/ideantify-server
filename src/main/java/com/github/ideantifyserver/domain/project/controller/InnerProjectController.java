@@ -96,4 +96,15 @@ public class InnerProjectController {
     ) {
         return ApiResponse.ok(innerProjectService.addComment(projectId, parentId, req, user));
     }
+
+    @PutMapping("/{projectId}/comments/{commentId}")
+    @Operation(summary = "프로젝트 댓글 수정")
+    public ApiResponse<CreatedCommentResponseDto> updateComment(
+            @PathVariable UUID projectId,
+            @PathVariable UUID commentId,
+            @RequestBody @Valid CreateCommentRequestDto req,
+            @AuthenticationPrincipal User user
+    ) {
+        return ApiResponse.ok(innerProjectService.updateComment(projectId, commentId, req, user));
+    }
 }
