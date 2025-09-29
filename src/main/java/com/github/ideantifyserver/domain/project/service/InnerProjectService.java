@@ -2,14 +2,13 @@ package com.github.ideantifyserver.domain.project.service;
 
 import com.github.ideantifyserver.domain.keyword.entity.Keyword;
 import com.github.ideantifyserver.domain.keyword.repository.KeywordRepository;
+import com.github.ideantifyserver.domain.project.dto.request.CreateCommentRequestDto;
 import com.github.ideantifyserver.domain.project.dto.request.CreateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.request.UpdateProjectRequestDto;
-import com.github.ideantifyserver.domain.project.dto.response.CommentResponseDto;
-import com.github.ideantifyserver.domain.project.dto.response.ProjectDetailResponseDto;
-import com.github.ideantifyserver.domain.project.dto.response.ProjectListResponseDto;
-import com.github.ideantifyserver.domain.project.dto.response.ProjectResponseDto;
+import com.github.ideantifyserver.domain.project.dto.response.*;
 import com.github.ideantifyserver.domain.project.entity.*;
 import com.github.ideantifyserver.domain.project.exception.InnerProjectExceptions;
+import com.github.ideantifyserver.domain.project.repository.InnerProjectCommentRepository;
 import com.github.ideantifyserver.domain.project.repository.InnerProjectRepository;
 import com.github.ideantifyserver.domain.project.specification.InnerProjectSpecifications;
 import com.github.ideantifyserver.domain.user.dto.response.UserResponseDto;
@@ -31,6 +30,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class InnerProjectService {
     private final InnerProjectRepository innerProjectRepository;
+    private final InnerProjectCommentRepository innerProjectCommentRepository;
     private final KeywordRepository keywordRepository;
     private final UserRepository userRepository;
 
@@ -326,5 +326,43 @@ public class InnerProjectService {
                                 .toList()
                 ))
                 .toList();
+    }
+
+    @Transactional
+    public CreatedCommentResponseDto addComment(UUID projectId, UUID parentId, CreateCommentRequestDto req, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
+        InnerProject project = innerProjectRepository.findById(projectId)
+                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+
+        InnerProjectComment parent = null;
+        if (parentId != null) {
+            boolean check = innerProjectCommentRepository.existsByIdAndProject_Id(parentId, projectId);
+            if (!check) {
+                throw InnerProjectExceptions.COMMENT_PARENT_NOT_FOUND.toException();
+            }
+            parent = innerProjectCommentRepository.getReferenceById(parentId);
+        }
+
+        InnerProjectComment comment = InnerProjectComment.builder()
+                .content(req.getContent())
+                .parent(parent)
+                .user(me)
+                .project(project)
+                .build();
+
+        innerProjectCommentRepository.save(comment);
+
+        return CreatedCommentResponseDto.of(
+                comment.getId(),
+                comment.getCreatedAt(),
+                comment.getUpdatedAt(),
+                CommentUserDto.of(
+                        comment.getUser().getId(),
+                        comment.getUser().getNickname(),
+                        comment.getUser().getAvatar()
+                ),
+                comment.getContent()
+        );
     }
 }

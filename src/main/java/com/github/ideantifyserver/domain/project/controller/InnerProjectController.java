@@ -1,7 +1,9 @@
 package com.github.ideantifyserver.domain.project.controller;
 
+import com.github.ideantifyserver.domain.project.dto.request.CreateCommentRequestDto;
 import com.github.ideantifyserver.domain.project.dto.request.CreateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.request.UpdateProjectRequestDto;
+import com.github.ideantifyserver.domain.project.dto.response.CreatedCommentResponseDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectDetailResponseDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectListResponseDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectResponseDto;
@@ -82,5 +84,16 @@ public class InnerProjectController {
     ) {
         innerProjectService.delete(projectId, user);
         return ApiResponse.ok();
+    }
+
+    @PostMapping("/{projectId}/comments")
+    @Operation(summary = "프로젝트 댓글 작성")
+    public ApiResponse<CreatedCommentResponseDto> addComment(
+            @PathVariable UUID projectId,
+            @RequestParam(required = false, name = "parent") UUID parentId,
+            @RequestBody @Valid CreateCommentRequestDto req,
+            @AuthenticationPrincipal User user
+    ) {
+        return ApiResponse.ok(innerProjectService.addComment(projectId, parentId, req, user));
     }
 }
