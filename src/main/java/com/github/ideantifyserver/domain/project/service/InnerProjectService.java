@@ -168,6 +168,13 @@ public class InnerProjectService {
         InnerProject project = innerProjectRepository.findById(id)
                 .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
 
+        List<CommentResponseDto> commentResponseDtos =
+                project.getComments().stream()
+                        .filter(c -> c.getParent() == null)
+                        .sorted(Comparator.comparing(InnerProjectComment::getCreatedAt))
+                        .map(this::toCommentTreeDto)
+                        .toList();
+
         UUID ownerId = project.getMembers().stream()
                 .filter(m -> Boolean.TRUE.equals(m.getIsOwner()))
                 .map(m -> m.getUser().getId())
@@ -191,14 +198,17 @@ public class InnerProjectService {
                         .map(InnerProjectFile::getFile)
                         .toList(),
                 project.getDescription(),
-                project.getComments().stream()
-                        .map(this::toCommentDto)
-                        .toList(),
+                commentResponseDtos,
                 ownerId
         );
     }
 
-    private CommentResponseDto toCommentDto(InnerProjectComment comment) {
+    private CommentResponseDto toCommentTreeDto(InnerProjectComment comment) {
+        List<CommentResponseDto> children = comment.getChildren().stream()
+                .sorted(Comparator.comparing(InnerProjectComment::getCreatedAt))
+                .map(this::toCommentTreeDto)
+                .toList();
+
         return CommentResponseDto.of(
                 comment.getId(),
                 comment.getCreatedAt(),
@@ -209,9 +219,7 @@ public class InnerProjectService {
                         comment.getUser().getAvatar()
                 ),
                 comment.getContent(),
-                comment.getChildren().stream()
-                        .map(this::toCommentDto)
-                        .toList()
+                children
         );
     }
 
