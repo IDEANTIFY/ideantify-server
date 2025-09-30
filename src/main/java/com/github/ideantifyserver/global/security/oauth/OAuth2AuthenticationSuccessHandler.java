@@ -33,11 +33,17 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String token = jwtUtil.generateToken(oAuth2User.getUser());
 
-        String redirectUrl = switch (registrationId.toLowerCase()) {
-            case "google" -> String.format("%s?token=%s", oauthProperty.getGoogle(), token);
-            case "kakao" -> String.format("%s?token=%s", oauthProperty.getKakao(), token);
-            default -> throw new IllegalArgumentException("지원하지 않는 OAuth2 제공자: " + registrationId);
-        };
+        String redirectUrl;
+
+        if (oAuth2User.hasKeywords()) { // 기존 유저인 경우
+            redirectUrl = switch (registrationId.toLowerCase()) {
+                case "google" -> String.format("%s?token=%s", oauthProperty.getGoogle(), token);
+                case "kakao" -> String.format("%s?token=%s", oauthProperty.getKakao(), token);
+                default -> throw new IllegalArgumentException("지원하지 않는 OAuth2 제공자: " + registrationId);
+            };
+        } else { // 최초 로그인한 유저인 경우
+            redirectUrl = String.format("/onboarding/keywords?token=%s", token);
+        }
 
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
