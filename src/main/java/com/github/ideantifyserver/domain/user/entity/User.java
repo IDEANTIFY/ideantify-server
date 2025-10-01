@@ -15,7 +15,13 @@ import java.util.List;
 @Builder(toBuilder = true)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
-public class User extends BaseSchema {
+public class User extends BaseSchema implements UserContext {
+
+    @Override
+    public String getUserId() {
+
+        return this.getId().toString();
+    }
 
     @Column(nullable = false, unique = true)
     @NotBlank
@@ -48,7 +54,7 @@ public class User extends BaseSchema {
     @Builder.Default
     List<InnerProjectMember> projects = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     List<UserDomain> keywords = new ArrayList<>();
 }
