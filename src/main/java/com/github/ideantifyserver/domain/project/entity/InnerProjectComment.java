@@ -36,6 +36,14 @@ public class InnerProjectComment extends BaseSchema {
     @JoinColumn(name = "project_id", nullable = false)
     InnerProject project;
 
+    @Column(nullable = false)
+    @Builder.Default
+    boolean deleted = false;
+
+    public void markDeleted() {
+        this.deleted = true;
+    }
+
     public void updateContent(@NotBlank String content) {
         this.content = content;
     }

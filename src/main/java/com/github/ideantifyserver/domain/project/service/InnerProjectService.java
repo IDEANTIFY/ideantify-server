@@ -399,4 +399,21 @@ public class InnerProjectService {
                 comment.getContent()
         );
     }
+
+    @Transactional
+    public void deleteComment(UUID projectId, UUID commentId, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
+        InnerProjectComment comment = innerProjectCommentRepository.findByIdAndProject_Id(commentId, projectId)
+                .orElseThrow(InnerProjectExceptions.COMMENT_NOT_FOUND::toException);
+
+        boolean isAuthor = comment.getUser().getId().equals(me.getId());
+        if (!isAuthor) {
+            throw InnerProjectExceptions.COMMENT_NOT_OWNER.toException();
+        }
+
+        if (comment.isDeleted()) return;
+
+        comment.markDeleted();
+    }
 }

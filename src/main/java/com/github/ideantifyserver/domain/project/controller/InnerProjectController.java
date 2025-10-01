@@ -107,4 +107,15 @@ public class InnerProjectController {
     ) {
         return ApiResponse.ok(innerProjectService.updateComment(projectId, commentId, req, user));
     }
+
+    @DeleteMapping("/{projectId}/comments/{commentId}")
+    @Operation(summary = "프로젝트 댓글 삭제")
+    public ApiResponse<Void> deleteComment(
+            @PathVariable UUID projectId,
+            @PathVariable UUID commentId,
+            @AuthenticationPrincipal User user
+    ) {
+        innerProjectService.deleteComment(projectId, commentId, user);
+        return ApiResponse.ok();
+    }
 }

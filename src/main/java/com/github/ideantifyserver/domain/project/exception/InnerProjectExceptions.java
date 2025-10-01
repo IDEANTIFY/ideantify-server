@@ -17,6 +17,7 @@ public enum InnerProjectExceptions implements ApiExceptionCode {
     COMMENT_PARENT_NOT_FOUND("INNERPROJECT_012", "부모 댓글을 찾을 수 없습니다."),
     COMMENT_NOT_FOUND("INNERPROJECT_013", "해당 댓글을 찾을 수 없습니다."),
     COMMENT_NOT_OWNER("INNERPROJECT_014", "해당 댓글의 작성자가 아닙니다."),
+    COMMENT_ALREADY_DELETED("INNERPROJECT_015", "이미 삭제된 댓글입니다."),
     ;
 
     private final String code;
