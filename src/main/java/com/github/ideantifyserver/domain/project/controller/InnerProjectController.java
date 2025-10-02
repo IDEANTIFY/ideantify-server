@@ -2,6 +2,7 @@ package com.github.ideantifyserver.domain.project.controller;
 
 import com.github.ideantifyserver.domain.project.dto.request.CreateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.request.UpdateProjectRequestDto;
+import com.github.ideantifyserver.domain.project.dto.response.ProjectBookmarkResponseDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectDetailResponseDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectLikeResponseDto;
 import com.github.ideantifyserver.domain.project.dto.response.ProjectListResponseDto;
@@ -83,6 +84,24 @@ public class InnerProjectController {
     ) {
         innerProjectService.delete(projectId, user);
         return ApiResponse.ok();
+    }
+
+    @PostMapping("/{projectId}/bookmark")
+    @Operation(summary = "북마크 추가")
+    public ApiResponse<ProjectBookmarkResponseDto> bookmarkProject(
+            @PathVariable UUID projectId,
+            @AuthenticationPrincipal User user
+    ) {
+        return ApiResponse.ok(innerProjectService.bookmarkProject(projectId, user));
+    }
+
+    @DeleteMapping("/{projectId}/bookmark")
+    @Operation(summary = "북마크 삭제")
+    public ApiResponse<ProjectBookmarkResponseDto> unbookmarkProject(
+            @PathVariable UUID projectId,
+            @AuthenticationPrincipal User user
+    ) {
+        return ApiResponse.ok(innerProjectService.unbookmarkProject(projectId, user));
     }
 
     @PostMapping("/{projectId}/like")
