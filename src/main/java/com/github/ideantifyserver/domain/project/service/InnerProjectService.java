@@ -219,6 +219,7 @@ public class InnerProjectService {
                         comment.getUser().getAvatar()
                 ),
                 comment.getContent(),
+                comment.isDeleted(),
                 children
         );
     }
@@ -380,6 +381,10 @@ public class InnerProjectService {
 
         InnerProjectComment comment = innerProjectCommentRepository.findByIdAndProject_Id(commentId, projectId)
                 .orElseThrow(InnerProjectExceptions.COMMENT_NOT_FOUND::toException);
+
+        if (comment.isDeleted()) {
+            throw InnerProjectExceptions.COMMENT_ALREADY_DELETED.toException();
+        }
 
         if (!comment.getUser().getId().equals(me.getId())) {
             throw InnerProjectExceptions.COMMENT_NOT_OWNER.toException();

@@ -16,5 +16,6 @@ public class CommentResponseDto {
     LocalDateTime updatedAt;
     UserResponseDto user;
     String content;
+    boolean isDeleted;
     List<CommentResponseDto> comments;
 }
