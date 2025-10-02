@@ -131,18 +131,30 @@ public class InnerProjectService {
             boolean bookmarked,
             boolean liked,
             boolean owned,
+            UUID userId,
             Pageable pageable,
             User me
     ) {
+        boolean needUser = bookmarked || liked || owned;
+
+        UUID targetUserId = null;
+        if (needUser) {
+            if (userId != null) {
+                targetUserId = userId;
+            } else {
+                targetUserId = me.getId();
+            }
+        }
+
         Specification<InnerProject> specification = Specification.allOf();
         if (bookmarked) {
-            specification = specification.and(InnerProjectSpecifications.bookmarkedBy(me.getId()));
+            specification = specification.and(InnerProjectSpecifications.bookmarkedBy(targetUserId));
         }
         if (liked) {
-            specification = specification.and(InnerProjectSpecifications.likedBy(me.getId()));
+            specification = specification.and(InnerProjectSpecifications.likedBy(targetUserId));
         }
         if (owned) {
-            specification = specification.and(InnerProjectSpecifications.memberOf(me.getId()));
+            specification = specification.and(InnerProjectSpecifications.memberOf(targetUserId));
         }
 
         Page<InnerProject> page = innerProjectRepository.findAll(specification, pageable);
