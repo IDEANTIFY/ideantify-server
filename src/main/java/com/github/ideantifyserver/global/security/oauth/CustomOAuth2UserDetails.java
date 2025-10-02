@@ -61,6 +61,6 @@ public class CustomOAuth2UserDetails implements UserDetails, OAuth2User {
 
     public boolean hasKeywords() {
 
-        return !user.getKeywords().isEmpty();
+        return user.getKeywords() != null && !user.getKeywords().isEmpty();
     }
 }

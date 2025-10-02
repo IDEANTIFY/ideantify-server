@@ -3,12 +3,10 @@ package com.github.ideantifyserver.global.security.oauth;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.entity.UserProvider;
 import com.github.ideantifyserver.domain.user.entity.UserSocial;
-import com.github.ideantifyserver.domain.user.repository.UserDomainRepository;
 import com.github.ideantifyserver.domain.user.repository.UserProviderRepository;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
 import com.github.ideantifyserver.domain.user.repository.UserSocialRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -24,7 +22,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     private final UserRepository userRepository;
     private final UserProviderRepository userProviderRepository;
     private final UserSocialRepository userSocialRepository;
-    private final UserDomainRepository userDomainRepository;
 
     @Override
     @Transactional
@@ -42,11 +39,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         // 3. 사용자 조회 혹은 생성
         User user = userRepository.findByEmail(oAuth2UserInfo.getEmail())
                 .orElseGet(() -> createUserWithProvider(oAuth2UserInfo));
-
-        Hibernate.initialize(user.getProviders());
-        Hibernate.initialize(user.getFollowers());
-        Hibernate.initialize(user.getFollowings());
-        Hibernate.initialize(user.getKeywords());
 
         return new CustomOAuth2UserDetails(user, oAuth2User.getAttributes());
     }

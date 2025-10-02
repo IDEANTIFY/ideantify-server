@@ -15,6 +15,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -70,7 +71,7 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
         }
 
         String ipAddress = request.getRemoteAddr();
-        String userAgent = request.getHeader("UserContext-Agent");
+        String userAgent = request.getHeader("User-Agent");
 
         String tempUserId = ipAddress + ":" + userAgent;
 
@@ -79,13 +80,13 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
         // 1. Redis에서 캐시된 익명 사용자 조회
         Object cached = redisTemplate.opsForValue().get(tempUserId);
         if (cached instanceof AnonymousUser) {
-            return (AnonymousUser) cached;
+            return cached;
         }
 
         // 2. 캐시되지 않았다면 새 익명 사용자 생성 및 캐싱
         AnonymousUser anonymousUser = AnonymousUser.builder().userId(tempUserId).build();
 
-        redisTemplate.opsForValue().set(tempUserId, anonymousUser);
+        redisTemplate.opsForValue().set(tempUserId, anonymousUser, Duration.ofHours(24));
 
         return anonymousUser;
     }

@@ -42,6 +42,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                 default -> throw new IllegalArgumentException("지원하지 않는 OAuth2 제공자: " + registrationId);
             };
         } else { // 최초 로그인한 유저인 경우
+            // TODO: 프론트엔드 라우트 확정 후 환경 변수로 변경 필요
             redirectUrl = String.format("/onboarding/keywords?token=%s", token);
         }
 

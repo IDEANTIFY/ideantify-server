@@ -42,5 +42,4 @@ dependencies {
 
     implementation 'io.lettuce:lettuce-core'
     implementation 'com.auth0:java-jwt:4.4.0'
-    implementation 'org.apache.commons:commons-lang3:3.18.0'
 }

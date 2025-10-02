@@ -22,8 +22,6 @@ public class RedisConfig {
 
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(redisProperty.getHost(), redisProperty.getPort());
 
-        config.setPassword(redisProperty.getPassword());
-
         return new LettuceConnectionFactory(config);
     }
 
