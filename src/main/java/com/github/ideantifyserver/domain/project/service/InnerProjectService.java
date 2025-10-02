@@ -4,12 +4,11 @@ import com.github.ideantifyserver.domain.keyword.entity.Keyword;
 import com.github.ideantifyserver.domain.keyword.repository.KeywordRepository;
 import com.github.ideantifyserver.domain.project.dto.request.CreateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.request.UpdateProjectRequestDto;
-import com.github.ideantifyserver.domain.project.dto.response.CommentResponseDto;
-import com.github.ideantifyserver.domain.project.dto.response.ProjectDetailResponseDto;
-import com.github.ideantifyserver.domain.project.dto.response.ProjectListResponseDto;
-import com.github.ideantifyserver.domain.project.dto.response.ProjectResponseDto;
+import com.github.ideantifyserver.domain.project.dto.response.*;
 import com.github.ideantifyserver.domain.project.entity.*;
 import com.github.ideantifyserver.domain.project.exception.InnerProjectExceptions;
+import com.github.ideantifyserver.domain.project.repository.InnerProjectBookmarkRepository;
+import com.github.ideantifyserver.domain.project.repository.InnerProjectLikeRepository;
 import com.github.ideantifyserver.domain.project.repository.InnerProjectRepository;
 import com.github.ideantifyserver.domain.project.specification.InnerProjectSpecifications;
 import com.github.ideantifyserver.domain.user.dto.response.UserResponseDto;
@@ -17,6 +16,7 @@ import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class InnerProjectService {
     private final InnerProjectRepository innerProjectRepository;
+    private final InnerProjectBookmarkRepository innerProjectBookmarkRepository;
+    private final InnerProjectLikeRepository innerProjectLikeRepository;
     private final KeywordRepository keywordRepository;
     private final UserRepository userRepository;
 
@@ -321,5 +323,92 @@ public class InnerProjectService {
         }
 
         innerProjectRepository.delete(project);
+    }
+
+    public List<ProjectListResponseDto> getProjectsByUser(UUID userId) {
+        List<InnerProject> projects = innerProjectRepository.findAllByMember(userId);
+
+        return projects.stream()
+                .map(p -> ProjectListResponseDto.of(
+                        p.getId(),
+                        p.getImage(),
+                        p.getSubject(),
+                        p.getKeywords().stream()
+                                .map(k -> k.getKeyword().getName())
+                                .toList(),
+                        p.getMembers().stream()
+                                .map(m -> m.getUser().getId())
+                                .toList()
+                ))
+                .toList();
+    }
+
+    @Transactional
+    public ProjectBookmarkResponseDto bookmarkProject(UUID projectId, User me) {
+    public ProjectLikeResponseDto likeProject(UUID projectId, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
+        InnerProject project = innerProjectRepository.findById(projectId)
+                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+
+        if (innerProjectBookmarkRepository.existsByProject_IdAndUser_Id(projectId, me.getId())) {
+            throw InnerProjectExceptions.ALREADY_BOOKMARKED.toException();
+        }
+
+        try {
+            innerProjectBookmarkRepository.save(
+                    InnerProjectBookmark.builder()
+
+        if (innerProjectLikeRepository.existsByProject_IdAndUser_Id(projectId, me.getId())) {
+            throw InnerProjectExceptions.ALREADY_LIKED.toException();
+        }
+
+        try {
+            innerProjectLikeRepository.save(
+                    InnerProjectLike.builder()
+                            .project(project)
+                            .user(me)
+                            .build()
+            );
+        } catch (DataIntegrityViolationException e) {
+            throw InnerProjectExceptions.ALREADY_BOOKMARKED.toException();
+        }
+
+        long count = innerProjectBookmarkRepository.countByProject_Id(projectId);
+
+        return ProjectBookmarkResponseDto.of(true, count);
+    }
+
+    @Transactional
+    public ProjectBookmarkResponseDto unbookmarkProject(UUID projectId, User me) {
+            throw InnerProjectExceptions.ALREADY_LIKED.toException();
+        }
+
+        long count = innerProjectLikeRepository.countByProject_Id(projectId);
+        return ProjectLikeResponseDto.of(true, count);
+    }
+
+    @Transactional
+    public ProjectLikeResponseDto unlikeProject(UUID projectId, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
+        innerProjectRepository.findById(projectId)
+                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+
+        if (innerProjectBookmarkRepository.deleteByProject_IdAndUser_Id(projectId, me.getId()) == 0) {
+            throw InnerProjectExceptions.NOT_BOOKMARKED.toException();
+        }
+
+        long count = innerProjectBookmarkRepository.countByProject_Id(projectId);
+
+        return ProjectBookmarkResponseDto.of(false, count);
+
+        if (innerProjectLikeRepository.deleteByProject_IdAndUser_Id(projectId, me.getId()) == 0) {
+            throw InnerProjectExceptions.NOT_LIKED.toException();
+        }
+
+        long count = innerProjectLikeRepository.countByProject_Id(projectId);
+
+        return ProjectLikeResponseDto.of(false, count);
     }
 }
