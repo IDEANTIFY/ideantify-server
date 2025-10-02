@@ -8,6 +8,7 @@ import com.github.ideantifyserver.domain.project.dto.response.*;
 import com.github.ideantifyserver.domain.project.entity.*;
 import com.github.ideantifyserver.domain.project.exception.InnerProjectExceptions;
 import com.github.ideantifyserver.domain.project.repository.InnerProjectBookmarkRepository;
+import com.github.ideantifyserver.domain.project.repository.InnerProjectLikeRepository;
 import com.github.ideantifyserver.domain.project.repository.InnerProjectRepository;
 import com.github.ideantifyserver.domain.project.specification.InnerProjectSpecifications;
 import com.github.ideantifyserver.domain.user.dto.response.UserResponseDto;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 public class InnerProjectService {
     private final InnerProjectRepository innerProjectRepository;
     private final InnerProjectBookmarkRepository innerProjectBookmarkRepository;
+    private final InnerProjectLikeRepository innerProjectLikeRepository;
     private final KeywordRepository keywordRepository;
     private final UserRepository userRepository;
 
@@ -330,6 +332,7 @@ public class InnerProjectService {
 
     @Transactional
     public ProjectBookmarkResponseDto bookmarkProject(UUID projectId, User me) {
+    public ProjectLikeResponseDto likeProject(UUID projectId, User me) {
         if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
 
         InnerProject project = innerProjectRepository.findById(projectId)
@@ -342,6 +345,14 @@ public class InnerProjectService {
         try {
             innerProjectBookmarkRepository.save(
                     InnerProjectBookmark.builder()
+
+        if (innerProjectLikeRepository.existsByProject_IdAndUser_Id(projectId, me.getId())) {
+            throw InnerProjectExceptions.ALREADY_LIKED.toException();
+        }
+
+        try {
+            innerProjectLikeRepository.save(
+                    InnerProjectLike.builder()
                             .project(project)
                             .user(me)
                             .build()
@@ -357,6 +368,15 @@ public class InnerProjectService {
 
     @Transactional
     public ProjectBookmarkResponseDto unbookmarkProject(UUID projectId, User me) {
+            throw InnerProjectExceptions.ALREADY_LIKED.toException();
+        }
+
+        long count = innerProjectLikeRepository.countByProject_Id(projectId);
+        return ProjectLikeResponseDto.of(true, count);
+    }
+
+    @Transactional
+    public ProjectLikeResponseDto unlikeProject(UUID projectId, User me) {
         if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
 
         innerProjectRepository.findById(projectId)
@@ -369,5 +389,13 @@ public class InnerProjectService {
         long count = innerProjectBookmarkRepository.countByProject_Id(projectId);
 
         return ProjectBookmarkResponseDto.of(false, count);
+
+        if (innerProjectLikeRepository.deleteByProject_IdAndUser_Id(projectId, me.getId()) == 0) {
+            throw InnerProjectExceptions.NOT_LIKED.toException();
+        }
+
+        long count = innerProjectLikeRepository.countByProject_Id(projectId);
+
+        return ProjectLikeResponseDto.of(false, count);
     }
 }

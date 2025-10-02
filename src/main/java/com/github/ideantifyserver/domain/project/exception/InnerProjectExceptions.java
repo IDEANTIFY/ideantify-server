@@ -14,6 +14,8 @@ public enum InnerProjectExceptions implements ApiExceptionCode {
     UNAUTHORIZED("INNERPROJECT_005", "가입되지 않은 사용자입니다."),
     OWNER_NOT_FOUND("INNERPROJECT_006", "작성자를 찾을 수 없습니다."),
     NOT_OWNER("INNERPROJECT_007", "해당 프로젝트의 작성자가 아닙니다."),
+    ALREADY_LIKED("INNERPROJECT_008", "이미 좋아요를 누른 프로젝트입니다."),
+    NOT_LIKED("INNERPROJECT_009", "좋아요를 누르지 않은 프로젝트입니다."),
     ALREADY_BOOKMARKED("INNERPROJECT_010", "이미 북마크한 프로젝트입니다."),
     NOT_BOOKMARKED("INNERPROJECT_011", "북마크하지 않은 프로젝트입니다."),
     ;
