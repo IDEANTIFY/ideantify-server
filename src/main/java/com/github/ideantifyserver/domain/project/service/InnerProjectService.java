@@ -142,6 +142,7 @@ public class InnerProjectService {
             if (userId != null) {
                 targetUserId = userId;
             } else {
+                if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
                 targetUserId = me.getId();
             }
         }
