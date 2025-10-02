@@ -321,22 +321,4 @@ public class InnerProjectService {
 
         innerProjectRepository.delete(project);
     }
-
-    public List<ProjectListResponseDto> getProjectsByUser(UUID userId) {
-        List<InnerProject> projects = innerProjectRepository.findAllByMember(userId);
-
-        return projects.stream()
-                .map(p -> ProjectListResponseDto.of(
-                        p.getId(),
-                        p.getImage(),
-                        p.getSubject(),
-                        p.getKeywords().stream()
-                                .map(k -> k.getKeyword().getName())
-                                .toList(),
-                        p.getMembers().stream()
-                                .map(m -> m.getUser().getId())
-                                .toList()
-                ))
-                .toList();
-    }
 }
