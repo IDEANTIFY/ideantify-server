@@ -18,6 +18,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,8 +26,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@PreAuthorize("isAuthenticated()")
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class InnerProjectService {
     private final InnerProjectRepository innerProjectRepository;
     private final InnerProjectBookmarkRepository innerProjectBookmarkRepository;
