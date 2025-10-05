@@ -41,13 +41,12 @@ public class UserController {
         return ApiResponse.ok(userService.getMyProfile(user));
     }
 
-    @GetMapping("/users")
+    @GetMapping
     @Operation(description = "유저 검색")
     public ApiResponse<List<SimpleUserResponse>> searchUsers(
-            @RequestParam(required = false) String nickname,
-            @RequestParam(required = false) String email
+            @RequestParam(required = false) String query
     ) {
 
-        return ApiResponse.ok(userService.searchUsers(nickname, email));
+        return ApiResponse.ok(userService.searchUsers(query));
     }
 }

@@ -6,6 +6,7 @@ import com.github.ideantifyserver.domain.user.dto.response.UserResponse;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,9 +25,9 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<SimpleUserResponse> searchUsers(String nickname, String email) {
+    public List<SimpleUserResponse> searchUsers(String query) {
 
-        List<User> user = userRepository.findByNicknameOrEmail(nickname, email);
+        List<User> user = userRepository.findByNicknameOrEmail(query, Limit.of(5));
         return user.stream().map(SimpleUserResponse::from).toList();
     }
 }
