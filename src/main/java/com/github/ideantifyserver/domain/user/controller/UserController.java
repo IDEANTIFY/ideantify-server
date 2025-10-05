@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "유저")
 @RestController
 @RequestMapping("/users")
@@ -41,9 +43,9 @@ public class UserController {
 
     @GetMapping("/users")
     @Operation(description = "유저 검색")
-    public ApiResponse<SimpleUserResponse> searchUsers(
-            @RequestParam String nickname,
-            @RequestParam String email
+    public ApiResponse<List<SimpleUserResponse>> searchUsers(
+            @RequestParam(required = false) String nickname,
+            @RequestParam(required = false) String email
     ) {
 
         return ApiResponse.ok(userService.searchUsers(nickname, email));

@@ -4,11 +4,12 @@ import com.github.ideantifyserver.domain.auth.exception.AuthExceptions;
 import com.github.ideantifyserver.domain.user.dto.response.SimpleUserResponse;
 import com.github.ideantifyserver.domain.user.dto.response.UserResponse;
 import com.github.ideantifyserver.domain.user.entity.User;
-import com.github.ideantifyserver.domain.user.exceptions.UserExceptions;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,13 +24,9 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public SimpleUserResponse searchUsers(String nickname, String email) {
+    public List<SimpleUserResponse> searchUsers(String nickname, String email) {
 
-        if (nickname == null || nickname.isEmpty() || email == null || email.isEmpty()) {
-            throw UserExceptions.INVALID_REQUEST.toException();
-        }
-
-        User user = userRepository.findByNicknameOrEmail(nickname, email).orElseThrow(AuthExceptions.USER_NOT_FOUND::toException);
-        return SimpleUserResponse.from(user);
+        List<User> user = userRepository.findByNicknameOrEmail(nickname, email);
+        return user.stream().map(SimpleUserResponse::from).toList();
     }
 }
