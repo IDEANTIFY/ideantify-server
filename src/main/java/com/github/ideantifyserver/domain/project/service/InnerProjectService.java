@@ -325,27 +325,8 @@ public class InnerProjectService {
         innerProjectRepository.delete(project);
     }
 
-    public List<ProjectListResponseDto> getProjectsByUser(UUID userId) {
-        List<InnerProject> projects = innerProjectRepository.findAllByMember(userId);
-
-        return projects.stream()
-                .map(p -> ProjectListResponseDto.of(
-                        p.getId(),
-                        p.getImage(),
-                        p.getSubject(),
-                        p.getKeywords().stream()
-                                .map(k -> k.getKeyword().getName())
-                                .toList(),
-                        p.getMembers().stream()
-                                .map(m -> m.getUser().getId())
-                                .toList()
-                ))
-                .toList();
-    }
-
     @Transactional
     public ProjectBookmarkResponseDto bookmarkProject(UUID projectId, User me) {
-    public ProjectLikeResponseDto likeProject(UUID projectId, User me) {
         if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
 
         InnerProject project = innerProjectRepository.findById(projectId)
@@ -358,14 +339,6 @@ public class InnerProjectService {
         try {
             innerProjectBookmarkRepository.save(
                     InnerProjectBookmark.builder()
-
-        if (innerProjectLikeRepository.existsByProject_IdAndUser_Id(projectId, me.getId())) {
-            throw InnerProjectExceptions.ALREADY_LIKED.toException();
-        }
-
-        try {
-            innerProjectLikeRepository.save(
-                    InnerProjectLike.builder()
                             .project(project)
                             .user(me)
                             .build()
@@ -381,6 +354,39 @@ public class InnerProjectService {
 
     @Transactional
     public ProjectBookmarkResponseDto unbookmarkProject(UUID projectId, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
+        innerProjectRepository.findById(projectId)
+                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+
+        if (innerProjectBookmarkRepository.deleteByProject_IdAndUser_Id(projectId, me.getId()) == 0) {
+            throw InnerProjectExceptions.NOT_BOOKMARKED.toException();
+        }
+
+        long count = innerProjectBookmarkRepository.countByProject_Id(projectId);
+
+        return ProjectBookmarkResponseDto.of(false, count);
+    }
+
+    @Transactional
+    public ProjectLikeResponseDto likeProject(UUID projectId, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
+        InnerProject project = innerProjectRepository.findById(projectId)
+                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+
+        if (innerProjectLikeRepository.existsByProject_IdAndUser_Id(projectId, me.getId())) {
+            throw InnerProjectExceptions.ALREADY_LIKED.toException();
+        }
+
+        try {
+            innerProjectLikeRepository.save(
+                    InnerProjectLike.builder()
+                            .project(project)
+                            .user(me)
+                            .build()
+            );
+        } catch (DataIntegrityViolationException e) {
             throw InnerProjectExceptions.ALREADY_LIKED.toException();
         }
 
@@ -394,14 +400,6 @@ public class InnerProjectService {
 
         innerProjectRepository.findById(projectId)
                 .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
-
-        if (innerProjectBookmarkRepository.deleteByProject_IdAndUser_Id(projectId, me.getId()) == 0) {
-            throw InnerProjectExceptions.NOT_BOOKMARKED.toException();
-        }
-
-        long count = innerProjectBookmarkRepository.countByProject_Id(projectId);
-
-        return ProjectBookmarkResponseDto.of(false, count);
 
         if (innerProjectLikeRepository.deleteByProject_IdAndUser_Id(projectId, me.getId()) == 0) {
             throw InnerProjectExceptions.NOT_LIKED.toException();
