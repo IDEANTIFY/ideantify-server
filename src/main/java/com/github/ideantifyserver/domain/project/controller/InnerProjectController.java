@@ -2,26 +2,24 @@ package com.github.ideantifyserver.domain.project.controller;
 
 import com.github.ideantifyserver.domain.project.dto.request.CreateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.request.UpdateProjectRequestDto;
-import com.github.ideantifyserver.domain.project.dto.response.ProjectBookmarkResponseDto;
-import com.github.ideantifyserver.domain.project.dto.response.ProjectDetailResponseDto;
-import com.github.ideantifyserver.domain.project.dto.response.ProjectLikeResponseDto;
-import com.github.ideantifyserver.domain.project.dto.response.ProjectListResponseDto;
-import com.github.ideantifyserver.domain.project.dto.response.ProjectResponseDto;
+import com.github.ideantifyserver.domain.project.dto.response.*;
+import com.github.ideantifyserver.domain.project.entity.InnerProject;
 import com.github.ideantifyserver.domain.project.service.InnerProjectService;
 import com.github.ideantifyserver.domain.user.entity.User;
+import com.github.ideantifyserver.global.resolver.CurrentUser;
 import com.github.ideantifyserver.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/projects")
@@ -35,7 +33,7 @@ public class InnerProjectController {
     @Operation(summary = "프로젝트 등록")
     public ApiResponse<ProjectResponseDto> createProject(
             @RequestBody @Valid CreateProjectRequestDto req,
-            @AuthenticationPrincipal User user
+            @CurrentUser(required = true) User user
     ) {
         return ApiResponse.ok(innerProjectService.create(req, user));
     }
@@ -47,78 +45,80 @@ public class InnerProjectController {
             @RequestParam(defaultValue = "false") boolean like,
             @RequestParam(defaultValue = "false") boolean own,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            @AuthenticationPrincipal User user
+            @CurrentUser(required = true) User user
     ) {
         return ApiResponse.ok(innerProjectService.getProjectList(bookmark, like, own, pageable, user));
     }
 
-    @GetMapping("/{projectId}")
+    @GetMapping("/{project}")
     @Operation(summary = "프로젝트 조회")
-    public ApiResponse<ProjectDetailResponseDto> getProject(@PathVariable UUID projectId) {
-        return ApiResponse.ok(innerProjectService.getProject(projectId));
+    public ApiResponse<ProjectDetailResponseDto> getProject(
+            @Parameter(description = "프로젝트 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable InnerProject project
+    ) {
+        return ApiResponse.ok(innerProjectService.getProject(project));
     }
 
-    @GetMapping(params = "userId")
+    @GetMapping(params = "user")
     @Operation(summary = "해당 유저의 프로젝트 조회")
     public ApiResponse<List<ProjectListResponseDto>> getAllProjects(
-            @RequestParam UUID userId
+            @Parameter(description = "유저 ID", schema = @Schema(type = "string", format = "uuid")) @RequestParam User user
     ) {
-        return ApiResponse.ok(innerProjectService.getProjectsByUser(userId));
+        return ApiResponse.ok(innerProjectService.getProjectsByUser(user));
     }
 
-    @PutMapping("/{projectId}")
+    @PutMapping("/{project}")
     @Operation(summary = "프로젝트 수정")
     public ApiResponse<ProjectResponseDto> updateProject(
-            @PathVariable UUID projectId,
+            @Parameter(description = "프로젝트 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable InnerProject project,
             @RequestBody @Valid UpdateProjectRequestDto req,
-            @AuthenticationPrincipal User user
+            @CurrentUser(required = true) User user
     ) {
-        return ApiResponse.ok(innerProjectService.update(projectId, req, user));
+        return ApiResponse.ok(innerProjectService.update(project, req, user));
     }
 
-    @DeleteMapping("/{projectId}")
+    @DeleteMapping("/{project}")
     @Operation(summary = "프로젝트 삭제")
     public ApiResponse<Void> deleteProject(
-            @PathVariable UUID projectId,
-            @AuthenticationPrincipal User user
+            @Parameter(description = "프로젝트 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable InnerProject project,
+            @CurrentUser(required = true) User user
     ) {
-        innerProjectService.delete(projectId, user);
+        innerProjectService.delete(project, user);
         return ApiResponse.ok();
     }
 
-    @PostMapping("/{projectId}/bookmark")
+    @PostMapping("/{project}/bookmark")
     @Operation(summary = "북마크 추가")
     public ApiResponse<ProjectBookmarkResponseDto> bookmarkProject(
-            @PathVariable UUID projectId,
-            @AuthenticationPrincipal User user
+            @Parameter(description = "프로젝트 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable InnerProject project,
+            @CurrentUser(required = true) User user
     ) {
-        return ApiResponse.ok(innerProjectService.bookmarkProject(projectId, user));
+        return ApiResponse.ok(innerProjectService.bookmarkProject(project, user));
     }
 
-    @DeleteMapping("/{projectId}/bookmark")
+    @DeleteMapping("/{project}/bookmark")
     @Operation(summary = "북마크 삭제")
     public ApiResponse<ProjectBookmarkResponseDto> unbookmarkProject(
-            @PathVariable UUID projectId,
-            @AuthenticationPrincipal User user
+            @Parameter(description = "프로젝트 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable InnerProject project,
+            @CurrentUser(required = true) User user
     ) {
-        return ApiResponse.ok(innerProjectService.unbookmarkProject(projectId, user));
+        return ApiResponse.ok(innerProjectService.unbookmarkProject(project, user));
     }
 
-    @PostMapping("/{projectId}/like")
+    @PostMapping("/{project}/like")
     @Operation(summary = "프로젝트 좋아요 추가")
     public ApiResponse<ProjectLikeResponseDto> likeProject(
-            @PathVariable UUID projectId,
-            @AuthenticationPrincipal User user
+            @Parameter(description = "프로젝트 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable InnerProject project,
+            @CurrentUser(required = true) User user
     ) {
-        return ApiResponse.ok(innerProjectService.likeProject(projectId, user));
+        return ApiResponse.ok(innerProjectService.likeProject(project, user));
     }
 
-    @DeleteMapping("/{projectId}/like")
+    @DeleteMapping("/{project}/like")
     @Operation(summary = "프로젝트 좋아요 삭제")
     public ApiResponse<ProjectLikeResponseDto> unlikeProject(
-            @PathVariable UUID projectId,
-            @AuthenticationPrincipal User user
+            @Parameter(description = "프로젝트 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable InnerProject project,
+            @CurrentUser(required = true) User user
     ) {
-        return ApiResponse.ok(innerProjectService.unlikeProject(projectId, user));
+        return ApiResponse.ok(innerProjectService.unlikeProject(project, user));
     }
 }

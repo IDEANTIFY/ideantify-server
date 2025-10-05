@@ -11,10 +11,8 @@ import com.github.ideantifyserver.domain.project.repository.InnerProjectBookmark
 import com.github.ideantifyserver.domain.project.repository.InnerProjectLikeRepository;
 import com.github.ideantifyserver.domain.project.repository.InnerProjectRepository;
 import com.github.ideantifyserver.domain.project.specification.InnerProjectSpecifications;
-import com.github.ideantifyserver.domain.user.dto.response.UserResponseDto;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
-import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -56,8 +54,6 @@ public class InnerProjectService {
                         .build())
                 );
 
-        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
-
         Set<UUID> memberIds = new HashSet<>(Optional.ofNullable(req.getMembers()).orElseGet(List::of));
         memberIds.add(me.getId());
 
@@ -93,23 +89,7 @@ public class InnerProjectService {
         );
 
         InnerProject saved = innerProjectRepository.save(project);
-
-        return ProjectResponseDto.of(
-                saved.getId(),
-                saved.getCreatedAt(),
-                saved.getUpdatedAt(),
-                saved.getImage(),
-                saved.getSubject(),
-                saved.getKeywords().stream()
-                        .map(k -> k.getKeyword().getName())
-                        .toList(),
-                saved.getGithub(),
-                saved.getMembers().stream()
-                        .map(m -> m.getUser().getId())
-                        .toList(),
-                saved.getFiles().stream().map(InnerProjectFile::getFile).toList(),
-                saved.getDescription()
-        );
+        return ProjectResponseDto.from(saved);
     }
 
     private Map<String, Keyword> ensureKeywords(List<String> names) {
@@ -129,6 +109,7 @@ public class InnerProjectService {
         return byName;
     }
 
+    @Transactional(readOnly = true)
     public List<ProjectListResponseDto> getProjectList(
             boolean bookmarked,
             boolean liked,
@@ -150,25 +131,12 @@ public class InnerProjectService {
         Page<InnerProject> page = innerProjectRepository.findAll(specification, pageable);
 
         return page.stream()
-                .map(p -> ProjectListResponseDto.of(
-                        p.getId(),
-                        p.getImage(),
-                        p.getSubject(),
-                        p.getKeywords().stream()
-                                .map(InnerProjectKeyword::getKeyword)
-                                .map(Keyword::getName)
-                                .toList(),
-                        p.getMembers().stream()
-                                .map(InnerProjectMember::getUser)
-                                .map(BaseSchema::getId)
-                                .toList()
-                ))
+                .map(ProjectListResponseDto::from)
                 .toList();
     }
 
-    public ProjectDetailResponseDto getProject(UUID id) {
-        InnerProject project = innerProjectRepository.findById(id)
-                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+    @Transactional(readOnly = true)
+    public ProjectDetailResponseDto getProject(InnerProject project) {
 
         UUID ownerId = project.getMembers().stream()
                 .filter(m -> Boolean.TRUE.equals(m.getIsOwner()))
@@ -176,54 +144,11 @@ public class InnerProjectService {
                 .findFirst()
                 .orElseThrow(InnerProjectExceptions.OWNER_NOT_FOUND::toException);
 
-        return ProjectDetailResponseDto.of(
-                project.getId(),
-                project.getCreatedAt(),
-                project.getUpdatedAt(),
-                project.getImage(),
-                project.getSubject(),
-                project.getKeywords().stream()
-                        .map(k -> k.getKeyword().getName())
-                        .toList(),
-                project.getGithub(),
-                project.getMembers().stream()
-                        .map(m -> m.getUser().getId())
-                        .toList(),
-                project.getFiles().stream()
-                        .map(InnerProjectFile::getFile)
-                        .toList(),
-                project.getDescription(),
-                project.getComments().stream()
-                        .map(this::toCommentDto)
-                        .toList(),
-                ownerId
-        );
-    }
-
-    private CommentResponseDto toCommentDto(InnerProjectComment comment) {
-        return CommentResponseDto.of(
-                comment.getId(),
-                comment.getCreatedAt(),
-                comment.getUpdatedAt(),
-                UserResponseDto.of(
-                        comment.getUser().getId(),
-                        comment.getUser().getNickname(),
-                        comment.getUser().getAvatar()
-                ),
-                comment.getContent(),
-                comment.getChildren().stream()
-                        .map(this::toCommentDto)
-                        .toList()
-        );
+        return ProjectDetailResponseDto.from(project, ownerId);
     }
 
     @Transactional
-    public ProjectResponseDto update(UUID id, UpdateProjectRequestDto req, User me) {
-        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
-
-        InnerProject project = innerProjectRepository.findById(id)
-                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
-
+    public ProjectResponseDto update(InnerProject project, UpdateProjectRequestDto req, User me) {
         UUID ownerId = project.getMembers().stream()
                 .filter(m -> Boolean.TRUE.equals(m.getIsOwner()))
                 .map(m -> m.getUser().getId())
@@ -278,27 +203,11 @@ public class InnerProjectService {
                 .toList();
         project.updateKeywords(newKeywords);
 
-        return ProjectResponseDto.of(
-                project.getId(),
-                project.getCreatedAt(),
-                project.getUpdatedAt(),
-                project.getImage(),
-                project.getSubject(),
-                project.getKeywords().stream().map(k -> k.getKeyword().getName()).toList(),
-                project.getGithub(),
-                project.getMembers().stream().map(m -> m.getUser().getId()).toList(),
-                project.getFiles().stream().map(InnerProjectFile::getFile).toList(),
-                project.getDescription()
-        );
+        return ProjectResponseDto.from(project);
     }
 
     @Transactional
-    public void delete(UUID id, User me) {
-        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
-
-        InnerProject project = innerProjectRepository.findById(id)
-                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
-
+    public void delete(InnerProject project, User me) {
         UUID ownerId = project.getMembers().stream()
                 .filter(m -> Boolean.TRUE.equals(m.getIsOwner()))
                 .map(m -> m.getUser().getId())
@@ -312,41 +221,50 @@ public class InnerProjectService {
         innerProjectRepository.delete(project);
     }
 
-    public List<ProjectListResponseDto> getProjectsByUser(UUID userId) {
-        List<InnerProject> projects = innerProjectRepository.findAllByMember(userId);
-
+    @Transactional(readOnly = true)
+    public List<ProjectListResponseDto> getProjectsByUser(User user) {
+        List<InnerProject> projects = innerProjectRepository.findAllByMember(user);
         return projects.stream()
-                .map(p -> ProjectListResponseDto.of(
-                        p.getId(),
-                        p.getImage(),
-                        p.getSubject(),
-                        p.getKeywords().stream()
-                                .map(k -> k.getKeyword().getName())
-                                .toList(),
-                        p.getMembers().stream()
-                                .map(m -> m.getUser().getId())
-                                .toList()
-                ))
+                .map(ProjectListResponseDto::from)
                 .toList();
     }
 
     @Transactional
-    public ProjectBookmarkResponseDto bookmarkProject(UUID projectId, User me) {
-    public ProjectLikeResponseDto likeProject(UUID projectId, User me) {
-        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
-
-        InnerProject project = innerProjectRepository.findById(projectId)
-                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
-
-        if (innerProjectBookmarkRepository.existsByProject_IdAndUser_Id(projectId, me.getId())) {
+    public ProjectBookmarkResponseDto bookmarkProject(InnerProject project, User me) {
+        if (innerProjectBookmarkRepository.existsByProjectAndUser(project, me)) {
             throw InnerProjectExceptions.ALREADY_BOOKMARKED.toException();
         }
 
         try {
             innerProjectBookmarkRepository.save(
                     InnerProjectBookmark.builder()
+                            .project(project)
+                            .user(me)
+                            .build()
+            );
+        } catch (DataIntegrityViolationException e) {
+            throw InnerProjectExceptions.ALREADY_BOOKMARKED.toException();
+        }
 
-        if (innerProjectLikeRepository.existsByProject_IdAndUser_Id(projectId, me.getId())) {
+        long count = innerProjectBookmarkRepository.countByProject(project);
+
+        return ProjectBookmarkResponseDto.of(true, count);
+    }
+
+    @Transactional
+    public ProjectBookmarkResponseDto unbookmarkProject(InnerProject project, User me) {
+        if (innerProjectBookmarkRepository.deleteByProjectAndUser(project, me) == 0) {
+            throw InnerProjectExceptions.NOT_BOOKMARKED.toException();
+        }
+
+        long count = innerProjectBookmarkRepository.countByProject(project);
+
+        return ProjectBookmarkResponseDto.of(false, count);
+    }
+
+    @Transactional
+    public ProjectLikeResponseDto likeProject(InnerProject project, User me) {
+        if (innerProjectLikeRepository.existsByProjectAndUser(project, me)) {
             throw InnerProjectExceptions.ALREADY_LIKED.toException();
         }
 
@@ -358,43 +276,20 @@ public class InnerProjectService {
                             .build()
             );
         } catch (DataIntegrityViolationException e) {
-            throw InnerProjectExceptions.ALREADY_BOOKMARKED.toException();
-        }
-
-        long count = innerProjectBookmarkRepository.countByProject_Id(projectId);
-
-        return ProjectBookmarkResponseDto.of(true, count);
-    }
-
-    @Transactional
-    public ProjectBookmarkResponseDto unbookmarkProject(UUID projectId, User me) {
             throw InnerProjectExceptions.ALREADY_LIKED.toException();
         }
 
-        long count = innerProjectLikeRepository.countByProject_Id(projectId);
+        long count = innerProjectLikeRepository.countByProject(project);
         return ProjectLikeResponseDto.of(true, count);
     }
 
     @Transactional
-    public ProjectLikeResponseDto unlikeProject(UUID projectId, User me) {
-        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
-
-        innerProjectRepository.findById(projectId)
-                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
-
-        if (innerProjectBookmarkRepository.deleteByProject_IdAndUser_Id(projectId, me.getId()) == 0) {
-            throw InnerProjectExceptions.NOT_BOOKMARKED.toException();
-        }
-
-        long count = innerProjectBookmarkRepository.countByProject_Id(projectId);
-
-        return ProjectBookmarkResponseDto.of(false, count);
-
-        if (innerProjectLikeRepository.deleteByProject_IdAndUser_Id(projectId, me.getId()) == 0) {
+    public ProjectLikeResponseDto unlikeProject(InnerProject project, User me) {
+        if (innerProjectLikeRepository.deleteByProjectAndUser(project, me) == 0) {
             throw InnerProjectExceptions.NOT_LIKED.toException();
         }
 
-        long count = innerProjectLikeRepository.countByProject_Id(projectId);
+        long count = innerProjectLikeRepository.countByProject(project);
 
         return ProjectLikeResponseDto.of(false, count);
     }

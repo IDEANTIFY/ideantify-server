@@ -7,6 +7,7 @@ import com.github.ideantifyserver.domain.user.repository.UserProviderRepository;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
 import com.github.ideantifyserver.domain.user.repository.UserSocialRepository;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
@@ -39,6 +40,10 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         // 3. 사용자 조회 혹은 생성
         User user = userRepository.findByEmail(oAuth2UserInfo.getEmail())
                 .orElseGet(() -> createUserWithProvider(oAuth2UserInfo));
+
+        // Hibernate 강제 초기화
+        Hibernate.initialize(user.getProviders());
+        Hibernate.initialize(user.getKeywords());
 
         return new CustomOAuth2UserDetails(user, oAuth2User.getAttributes());
     }
