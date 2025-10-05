@@ -1,5 +1,6 @@
 package com.github.ideantifyserver.domain.user.controller;
 
+import com.github.ideantifyserver.domain.user.dto.response.SimpleUserResponse;
 import com.github.ideantifyserver.domain.user.dto.response.UserResponse;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.service.UserService;
@@ -10,10 +11,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "유저")
 @RestController
@@ -35,9 +33,19 @@ public class UserController {
     @GetMapping("/{user}")
     @Operation(description = "다른 사람 정보 조회")
     public ApiResponse<UserResponse> getUserProfile(
-            @Parameter(name = "유저 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable User user
+            @Parameter(description = "유저 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable User user
     ) {
 
         return ApiResponse.ok(userService.getMyProfile(user));
+    }
+
+    @GetMapping("/users")
+    @Operation(description = "유저 검색")
+    public ApiResponse<SimpleUserResponse> searchUsers(
+            @RequestParam String nickname,
+            @RequestParam String email
+    ) {
+
+        return ApiResponse.ok(userService.searchUsers(nickname, email));
     }
 }
