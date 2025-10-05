@@ -46,24 +46,17 @@ public class InnerProjectController {
             @RequestParam(defaultValue = "false") boolean bookmark,
             @RequestParam(defaultValue = "false") boolean like,
             @RequestParam(defaultValue = "false") boolean own,
+            @RequestParam(required = false) UUID userId,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal User user
     ) {
-        return ApiResponse.ok(innerProjectService.getProjectList(bookmark, like, own, pageable, user));
+        return ApiResponse.ok(innerProjectService.getProjectList(bookmark, like, own, userId, pageable, user));
     }
 
     @GetMapping("/{projectId}")
     @Operation(summary = "프로젝트 조회")
     public ApiResponse<ProjectDetailResponseDto> getProject(@PathVariable UUID projectId) {
         return ApiResponse.ok(innerProjectService.getProject(projectId));
-    }
-
-    @GetMapping(params = "userId")
-    @Operation(summary = "해당 유저의 프로젝트 조회")
-    public ApiResponse<List<ProjectListResponseDto>> getAllProjects(
-            @RequestParam UUID userId
-    ) {
-        return ApiResponse.ok(innerProjectService.getProjectsByUser(userId));
     }
 
     @PutMapping("/{projectId}")
