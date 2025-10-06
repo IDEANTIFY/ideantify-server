@@ -12,7 +12,8 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CreateProjectRequestDto {
+public class CreateProjectRequestDto implements UpsertProjectRequestDto {
+
         @NotBlank
         String image;
 

@@ -13,6 +13,7 @@ import com.github.ideantifyserver.domain.project.repository.InnerProjectReposito
 import com.github.ideantifyserver.domain.project.specification.InnerProjectSpecifications;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
+import com.github.ideantifyserver.global.exception.GlobalExceptions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -44,7 +45,7 @@ public class InnerProjectService {
 
         List<String> files = Optional.ofNullable(req.getFiles()).orElseGet(List::of);
         if (files.stream().anyMatch(f -> f == null || f.isBlank())) {
-            throw InnerProjectExceptions.INVALID_FILE_PATH.toException();
+            throw GlobalExceptions.INVALID_REQUEST.toException();
         }
 
         files.forEach(f -> project.getFiles().add(InnerProjectFile.builder()
@@ -59,7 +60,7 @@ public class InnerProjectService {
         List<User> users = memberIds.stream()
                 .map(id -> Optional.ofNullable(id)
                         .flatMap(userRepository::findById)
-                        .orElseThrow(InnerProjectExceptions.INVALID_MEMBER_ID::toException))
+                        .orElseThrow(GlobalExceptions.INVALID_REQUEST::toException))
                 .toList();
 
         for (User u : users) {
@@ -117,7 +118,16 @@ public class InnerProjectService {
             Pageable pageable,
             User me
     ) {
-        User targetUser = user != null ? user : me;
+        boolean needUser = bookmarked || liked || owned;
+
+        User targetUser = null;
+        if (needUser) {
+            if (user != null) {
+                targetUser = user;
+            } else {
+                targetUser = me;
+            }
+        }
 
         Specification<InnerProject> specification = Specification.allOf();
         if (bookmarked) {
@@ -144,7 +154,7 @@ public class InnerProjectService {
                 .filter(m -> Boolean.TRUE.equals(m.getIsOwner()))
                 .map(m -> m.getUser().getId())
                 .findFirst()
-                .orElseThrow(InnerProjectExceptions.OWNER_NOT_FOUND::toException);
+                .orElseThrow(GlobalExceptions.NOT_FOUND::toException);
 
         return ProjectDetailResponseDto.from(project, ownerId);
     }
@@ -155,17 +165,17 @@ public class InnerProjectService {
                 .filter(m -> Boolean.TRUE.equals(m.getIsOwner()))
                 .map(m -> m.getUser().getId())
                 .findFirst()
-                .orElseThrow(InnerProjectExceptions.OWNER_NOT_FOUND::toException);
+                .orElseThrow(GlobalExceptions.NOT_FOUND::toException);
 
         if (!ownerId.equals(me.getId())) {
-            throw InnerProjectExceptions.NOT_OWNER.toException();
+            throw GlobalExceptions.NOT_PERMITTED.toException();
         }
 
         project.updateBasics(req.getImage(), req.getSubject(), req.getGithub(), req.getDescription());
 
         List<String> files = Optional.ofNullable(req.getFiles()).orElseGet(List::of);
         if (files.stream().anyMatch(f -> f == null || f.isBlank())) {
-            throw InnerProjectExceptions.INVALID_FILE_PATH.toException();
+            throw GlobalExceptions.INVALID_REQUEST.toException();
         }
         List<InnerProjectFile> newFiles = files.stream()
                 .map(f -> InnerProjectFile.builder().file(f).build())
@@ -178,7 +188,7 @@ public class InnerProjectService {
         List<InnerProjectMember> newMembers = memberIds.stream()
                 .map(idOpt -> Optional.ofNullable(idOpt)
                         .flatMap(userRepository::findById)
-                        .orElseThrow(InnerProjectExceptions.INVALID_MEMBER_ID::toException))
+                        .orElseThrow(GlobalExceptions.INVALID_REQUEST::toException))
                 .map(u -> InnerProjectMember.builder()
                         .user(u)
                         .isOwner(u.getId().equals(ownerId))
@@ -194,7 +204,7 @@ public class InnerProjectService {
                 .toList();
 
         if (names.isEmpty() && req.getKeywords() != null && !req.getKeywords().isEmpty()) {
-            throw InnerProjectExceptions.INVALID_KEYWORD.toException();
+            throw GlobalExceptions.INVALID_REQUEST.toException();
         }
 
         Map<String, Keyword> keywordMap = ensureKeywords(names);
@@ -214,10 +224,10 @@ public class InnerProjectService {
                 .filter(m -> Boolean.TRUE.equals(m.getIsOwner()))
                 .map(m -> m.getUser().getId())
                 .findFirst()
-                .orElseThrow(InnerProjectExceptions.OWNER_NOT_FOUND::toException);
+                .orElseThrow(GlobalExceptions.NOT_FOUND::toException);
 
         if (!ownerId.equals(me.getId())) {
-            throw InnerProjectExceptions.NOT_OWNER.toException();
+            throw GlobalExceptions.NOT_PERMITTED.toException();
         }
 
         innerProjectRepository.delete(project);
