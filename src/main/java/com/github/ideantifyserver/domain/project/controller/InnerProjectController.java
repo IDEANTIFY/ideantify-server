@@ -62,14 +62,6 @@ public class InnerProjectController {
         return ApiResponse.ok(innerProjectService.getProject(project));
     }
 
-    @GetMapping(params = "user")
-    @Operation(summary = "해당 유저의 프로젝트 조회")
-    public ApiResponse<List<ProjectListResponseDto>> getAllProjects(
-            @Parameter(description = "유저 ID", schema = @Schema(type = "string", format = "uuid")) @RequestParam User user
-    ) {
-        return ApiResponse.ok(innerProjectService.getProjectsByUser(user));
-    }
-
     @PutMapping("/{project}")
     @Operation(summary = "프로젝트 수정")
     public ApiResponse<ProjectResponseDto> updateProject(

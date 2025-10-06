@@ -233,14 +233,6 @@ public class InnerProjectService {
         innerProjectRepository.delete(project);
     }
 
-    @Transactional(readOnly = true)
-    public List<ProjectListResponseDto> getProjectsByUser(User user) {
-        List<InnerProject> projects = innerProjectRepository.findAllByMember(user);
-        return projects.stream()
-                .map(ProjectListResponseDto::from)
-                .toList();
-    }
-
     @Transactional
     public ProjectBookmarkResponseDto bookmarkProject(InnerProject project, User me) {
         if (innerProjectBookmarkRepository.existsByProjectAndUser(project, me)) {
