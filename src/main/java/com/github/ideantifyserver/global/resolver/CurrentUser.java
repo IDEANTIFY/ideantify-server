@@ -10,5 +10,5 @@ import java.lang.annotation.*;
 @Documented
 public @interface CurrentUser {
 
-    boolean required() default false;
+    boolean required() default true;
 }

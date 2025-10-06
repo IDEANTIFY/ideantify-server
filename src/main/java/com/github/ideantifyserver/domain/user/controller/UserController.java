@@ -28,7 +28,7 @@ public class UserController {
     @GetMapping("/me")
     @Operation(summary = "내 정보 조회")
     public ApiResponse<UserResponse> getMyProfile(
-            @CurrentUser(required = true) User user
+            @CurrentUser User user
     ) {
 
         return ApiResponse.ok(userService.getMyProfile(user));

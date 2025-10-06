@@ -36,7 +36,7 @@ public class InnerProjectController {
     @Operation(summary = "프로젝트 등록")
     public ApiResponse<ProjectResponseDto> createProject(
             @RequestBody @Valid CreateProjectRequestDto req,
-            @CurrentUser(required = true) User user
+            @CurrentUser User user
     ) {
         return ApiResponse.ok(innerProjectService.create(req, user));
     }
@@ -49,7 +49,7 @@ public class InnerProjectController {
             @RequestParam(defaultValue = "false") boolean own,
             @RequestParam(required = false) UUID userId,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            @CurrentUser(required = true) User user
+            @CurrentUser User user
     ) {
         return ApiResponse.ok(innerProjectService.getProjectList(bookmark, like, own, userId, pageable, user));
     }
@@ -67,7 +67,7 @@ public class InnerProjectController {
     public ApiResponse<ProjectResponseDto> updateProject(
             @Parameter(description = "프로젝트 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable InnerProject project,
             @RequestBody @Valid UpdateProjectRequestDto req,
-            @CurrentUser(required = true) User user
+            @CurrentUser User user
     ) {
         return ApiResponse.ok(innerProjectService.update(project, req, user));
     }
@@ -76,7 +76,7 @@ public class InnerProjectController {
     @Operation(summary = "프로젝트 삭제")
     public ApiResponse<Void> deleteProject(
             @Parameter(description = "프로젝트 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable InnerProject project,
-            @CurrentUser(required = true) User user
+            @CurrentUser User user
     ) {
         innerProjectService.delete(project, user);
         return ApiResponse.ok();
@@ -86,7 +86,7 @@ public class InnerProjectController {
     @Operation(summary = "북마크 추가")
     public ApiResponse<ProjectBookmarkResponseDto> bookmarkProject(
             @Parameter(description = "프로젝트 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable InnerProject project,
-            @CurrentUser(required = true) User user
+            @CurrentUser User user
     ) {
         return ApiResponse.ok(innerProjectService.bookmarkProject(project, user));
     }
@@ -95,7 +95,7 @@ public class InnerProjectController {
     @Operation(summary = "북마크 삭제")
     public ApiResponse<ProjectBookmarkResponseDto> unbookmarkProject(
             @Parameter(description = "프로젝트 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable InnerProject project,
-            @CurrentUser(required = true) User user
+            @CurrentUser User user
     ) {
         return ApiResponse.ok(innerProjectService.unbookmarkProject(project, user));
     }
@@ -104,7 +104,7 @@ public class InnerProjectController {
     @Operation(summary = "프로젝트 좋아요 추가")
     public ApiResponse<ProjectLikeResponseDto> likeProject(
             @Parameter(description = "프로젝트 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable InnerProject project,
-            @CurrentUser(required = true) User user
+            @CurrentUser User user
     ) {
         return ApiResponse.ok(innerProjectService.likeProject(project, user));
     }
@@ -113,7 +113,7 @@ public class InnerProjectController {
     @Operation(summary = "프로젝트 좋아요 삭제")
     public ApiResponse<ProjectLikeResponseDto> unlikeProject(
             @Parameter(description = "프로젝트 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable InnerProject project,
-            @CurrentUser(required = true) User user
+            @CurrentUser User user
     ) {
         return ApiResponse.ok(innerProjectService.unlikeProject(project, user));
     }
