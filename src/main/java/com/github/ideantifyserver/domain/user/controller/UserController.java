@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "유저")
+@Tag(name = "[User]")
 @PreAuthorize("isAuthenticated()")
 @RestController
 @RequestMapping("/users")

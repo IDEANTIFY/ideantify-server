@@ -21,11 +21,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "[Project]")
 @PreAuthorize("isAuthenticated()")
 @RestController
 @RequestMapping("/projects")
 @RequiredArgsConstructor
-@Tag(name = "[Project]")
 public class InnerProjectController {
 
     private final InnerProjectService innerProjectService;
@@ -78,41 +78,5 @@ public class InnerProjectController {
     ) {
         innerProjectService.delete(project, user);
         return ApiResponse.ok();
-    }
-
-    @PostMapping("/{project}/bookmark")
-    @Operation(summary = "북마크 추가")
-    public ApiResponse<ProjectBookmarkResponseDto> bookmarkProject(
-            @DomainParameter(description = "프로젝트 ID") @PathVariable InnerProject project,
-            @CurrentUser User user
-    ) {
-        return ApiResponse.ok(innerProjectService.bookmarkProject(project, user));
-    }
-
-    @DeleteMapping("/{project}/bookmark")
-    @Operation(summary = "북마크 삭제")
-    public ApiResponse<ProjectBookmarkResponseDto> unbookmarkProject(
-            @DomainParameter(description = "프로젝트 ID") @PathVariable InnerProject project,
-            @CurrentUser User user
-    ) {
-        return ApiResponse.ok(innerProjectService.unbookmarkProject(project, user));
-    }
-
-    @PostMapping("/{project}/like")
-    @Operation(summary = "프로젝트 좋아요 추가")
-    public ApiResponse<ProjectLikeResponseDto> likeProject(
-            @DomainParameter(description = "프로젝트 ID") @PathVariable InnerProject project,
-            @CurrentUser User user
-    ) {
-        return ApiResponse.ok(innerProjectService.likeProject(project, user));
-    }
-
-    @DeleteMapping("/{project}/like")
-    @Operation(summary = "프로젝트 좋아요 삭제")
-    public ApiResponse<ProjectLikeResponseDto> unlikeProject(
-            @DomainParameter(description = "프로젝트 ID") @PathVariable InnerProject project,
-            @CurrentUser User user
-    ) {
-        return ApiResponse.ok(innerProjectService.unlikeProject(project, user));
     }
 }
