@@ -27,7 +27,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<SimpleUserResponse> searchUsers(String query) {
 
-        List<User> user = userRepository.findByNicknameOrEmail(query, Limit.of(5));
-        return user.stream().map(SimpleUserResponse::from).toList();
+        List<User> users = userRepository.findByNicknameOrEmail(query, Limit.of(5));
+        return users.stream().map(SimpleUserResponse::from).toList();
     }
 }

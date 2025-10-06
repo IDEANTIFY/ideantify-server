@@ -26,7 +26,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    @Operation(description = "내 정보 조회")
+    @Operation(summary = "내 정보 조회")
     public ApiResponse<UserResponse> getMyProfile(
             @CurrentUser(required = true) User user
     ) {
@@ -35,7 +35,7 @@ public class UserController {
     }
 
     @GetMapping("/{user}")
-    @Operation(description = "다른 사람 정보 조회")
+    @Operation(summary = "다른 사람 정보 조회")
     public ApiResponse<UserResponse> getUserProfile(
             @Parameter(description = "유저 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable User user
     ) {
@@ -44,7 +44,7 @@ public class UserController {
     }
 
     @GetMapping
-    @Operation(description = "유저 검색")
+    @Operation(summary = "유저 검색")
     public ApiResponse<List<SimpleUserResponse>> searchUsers(
             @RequestParam(required = false) String query
     ) {
