@@ -48,10 +48,11 @@ public class InnerProjectController {
             @RequestParam(defaultValue = "false") boolean bookmark,
             @RequestParam(defaultValue = "false") boolean like,
             @RequestParam(defaultValue = "false") boolean own,
+            @RequestParam(required = false) UUID userId,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal User user
     ) {
-        return ApiResponse.ok(innerProjectService.getProjectList(bookmark, like, own, pageable, user));
+        return ApiResponse.ok(innerProjectService.getProjectList(bookmark, like, own, userId, pageable, user));
     }
 
     @GetMapping("/{projectId}")
