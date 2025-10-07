@@ -58,14 +58,6 @@ public class InnerProjectController {
         return ApiResponse.ok(innerProjectService.getProject(projectId));
     }
 
-    @GetMapping(params = "userId")
-    @Operation(summary = "해당 유저의 프로젝트 조회")
-    public ApiResponse<List<ProjectListResponseDto>> getAllProjects(
-            @RequestParam UUID userId
-    ) {
-        return ApiResponse.ok(innerProjectService.getProjectsByUser(userId));
-    }
-
     @PutMapping("/{projectId}")
     @Operation(summary = "프로젝트 수정")
     public ApiResponse<ProjectResponseDto> updateProject(
