@@ -326,8 +326,6 @@ public class InnerProjectService {
 
     @Transactional
     public CreatedCommentResponseDto addComment(UUID projectId, UUID parentId, CreateCommentRequestDto req, User me) {
-    public ProjectBookmarkResponseDto bookmarkProject(UUID projectId, User me) {
-    public ProjectLikeResponseDto likeProject(UUID projectId, User me) {
         if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
 
         InnerProject project = innerProjectRepository.findById(projectId)
@@ -375,7 +373,8 @@ public class InnerProjectService {
             throw InnerProjectExceptions.COMMENT_ALREADY_DELETED.toException();
         }
 
-        if (!comment.getUser().getId().equals(me.getId())) {
+        boolean isAuthor = comment.getUser().getId().equals(me.getId());
+        if (!isAuthor) {
             throw InnerProjectExceptions.COMMENT_NOT_OWNER.toException();
         }
 
@@ -409,6 +408,14 @@ public class InnerProjectService {
         if (comment.isDeleted()) return;
 
         comment.markDeleted();
+    }
+
+    @Transactional
+    public ProjectBookmarkResponseDto bookmarkProject(UUID projectId, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
+        InnerProject project = innerProjectRepository.findById(projectId)
+                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
 
         if (innerProjectBookmarkRepository.existsByProject_IdAndUser_Id(projectId, me.getId())) {
             throw InnerProjectExceptions.ALREADY_BOOKMARKED.toException();
@@ -417,14 +424,6 @@ public class InnerProjectService {
         try {
             innerProjectBookmarkRepository.save(
                     InnerProjectBookmark.builder()
-
-        if (innerProjectLikeRepository.existsByProject_IdAndUser_Id(projectId, me.getId())) {
-            throw InnerProjectExceptions.ALREADY_LIKED.toException();
-        }
-
-        try {
-            innerProjectLikeRepository.save(
-                    InnerProjectLike.builder()
                             .project(project)
                             .user(me)
                             .build()
@@ -440,6 +439,39 @@ public class InnerProjectService {
 
     @Transactional
     public ProjectBookmarkResponseDto unbookmarkProject(UUID projectId, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
+        innerProjectRepository.findById(projectId)
+                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+
+        if (innerProjectBookmarkRepository.deleteByProject_IdAndUser_Id(projectId, me.getId()) == 0) {
+            throw InnerProjectExceptions.NOT_BOOKMARKED.toException();
+        }
+
+        long count = innerProjectBookmarkRepository.countByProject_Id(projectId);
+
+        return ProjectBookmarkResponseDto.of(false, count);
+    }
+
+    @Transactional
+    public ProjectLikeResponseDto likeProject(UUID projectId, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
+        InnerProject project = innerProjectRepository.findById(projectId)
+                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+
+        if (innerProjectLikeRepository.existsByProject_IdAndUser_Id(projectId, me.getId())) {
+            throw InnerProjectExceptions.ALREADY_LIKED.toException();
+        }
+
+        try {
+            innerProjectLikeRepository.save(
+                    InnerProjectLike.builder()
+                            .project(project)
+                            .user(me)
+                            .build()
+            );
+        } catch (DataIntegrityViolationException e) {
             throw InnerProjectExceptions.ALREADY_LIKED.toException();
         }
 
@@ -453,14 +485,6 @@ public class InnerProjectService {
 
         innerProjectRepository.findById(projectId)
                 .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
-
-        if (innerProjectBookmarkRepository.deleteByProject_IdAndUser_Id(projectId, me.getId()) == 0) {
-            throw InnerProjectExceptions.NOT_BOOKMARKED.toException();
-        }
-
-        long count = innerProjectBookmarkRepository.countByProject_Id(projectId);
-
-        return ProjectBookmarkResponseDto.of(false, count);
 
         if (innerProjectLikeRepository.deleteByProject_IdAndUser_Id(projectId, me.getId()) == 0) {
             throw InnerProjectExceptions.NOT_LIKED.toException();
