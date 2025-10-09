@@ -18,6 +18,10 @@ public enum InnerProjectExceptions implements ApiExceptionCode {
     NOT_LIKED("INNERPROJECT_009", "좋아요를 누르지 않은 프로젝트입니다."),
     ALREADY_BOOKMARKED("INNERPROJECT_010", "이미 북마크한 프로젝트입니다."),
     NOT_BOOKMARKED("INNERPROJECT_011", "북마크하지 않은 프로젝트입니다."),
+    COMMENT_PARENT_NOT_FOUND("INNERPROJECT_012", "부모 댓글을 찾을 수 없습니다."),
+    COMMENT_NOT_FOUND("INNERPROJECT_013", "해당 댓글을 찾을 수 없습니다."),
+    COMMENT_NOT_OWNER("INNERPROJECT_014", "해당 댓글의 작성자가 아닙니다."),
+    COMMENT_ALREADY_DELETED("INNERPROJECT_015", "이미 삭제된 댓글입니다."),
     ;
 
     private final String code;
