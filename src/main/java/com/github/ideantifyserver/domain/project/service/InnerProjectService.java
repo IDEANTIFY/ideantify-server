@@ -186,12 +186,20 @@ public class InnerProjectService {
         InnerProject project = innerProjectRepository.findById(id)
                 .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
 
-        List<CommentResponseDto> commentResponseDtos =
-                project.getComments().stream()
-                        .filter(c -> c.getParent() == null)
-                        .sorted(Comparator.comparing(InnerProjectComment::getCreatedAt))
-                        .map(this::toCommentTreeDto)
-                        .toList();
+        List<InnerProjectComment> all = innerProjectCommentRepository
+                .findAllByProject_IdOrderByCreatedAtAsc(id);
+
+        Map<UUID, List<InnerProjectComment>> childrenMap = all.stream()
+                .filter(c -> c.getParent() != null)
+                .collect(Collectors.groupingBy(c -> c.getParent().getId(), LinkedHashMap::new, Collectors.toList()));
+
+        List<InnerProjectComment> roots = all.stream()
+                .filter(c -> c.getParent() == null)
+                .toList();
+
+        List<CommentResponseDto> commentResponseDtos = roots.stream()
+                .map(c -> toCommentTreeDto(c, childrenMap))
+                .toList();
 
         UUID ownerId = project.getMembers().stream()
                 .filter(m -> Boolean.TRUE.equals(m.getIsOwner()))
@@ -221,10 +229,15 @@ public class InnerProjectService {
         );
     }
 
-    private CommentResponseDto toCommentTreeDto(InnerProjectComment comment) {
-        List<CommentResponseDto> children = comment.getChildren().stream()
+    private CommentResponseDto toCommentTreeDto(
+            InnerProjectComment comment,
+            Map<UUID, List<InnerProjectComment>> childrenMap
+    ) {
+        List<CommentResponseDto> childDtos = childrenMap
+                .getOrDefault(comment.getId(), List.of())
+                .stream()
                 .sorted(Comparator.comparing(InnerProjectComment::getCreatedAt))
-                .map(this::toCommentTreeDto)
+                .map(c -> toCommentTreeDto(c, childrenMap))
                 .toList();
 
         return CommentResponseDto.of(
@@ -238,7 +251,7 @@ public class InnerProjectService {
                 ),
                 comment.getContent(),
                 comment.isDeleted(),
-                children
+                childDtos
         );
     }
 
