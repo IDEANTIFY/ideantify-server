@@ -359,11 +359,9 @@ public class InnerProjectService {
 
         InnerProjectComment parent = null;
         if (parentId != null) {
-            boolean check = innerProjectCommentRepository.existsByIdAndProject_Id(parentId, projectId);
-            if (!check) {
-                throw InnerProjectExceptions.COMMENT_PARENT_NOT_FOUND.toException();
-            }
-            parent = innerProjectCommentRepository.getReferenceById(parentId);
+            parent = innerProjectCommentRepository
+                    .findForUpdateByIdAndProjectId(parentId, projectId)
+                    .orElseThrow(InnerProjectExceptions.COMMENT_PARENT_NOT_FOUND::toException);
         }
 
         InnerProjectComment comment = InnerProjectComment.builder()
@@ -373,7 +371,7 @@ public class InnerProjectService {
                 .project(project)
                 .build();
 
-        innerProjectCommentRepository.save(comment);
+        innerProjectCommentRepository.saveAndFlush(comment);
 
         return CreatedCommentResponseDto.of(
                 comment.getId(),
