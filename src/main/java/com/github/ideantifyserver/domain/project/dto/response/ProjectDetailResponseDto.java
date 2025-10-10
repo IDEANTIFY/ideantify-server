@@ -26,7 +26,7 @@ public class ProjectDetailResponseDto {
     List<CommentResponseDto> comments;
     UUID ownerId;
 
-    public static ProjectDetailResponseDto from(InnerProject project, UUID ownerId) {
+    public static ProjectDetailResponseDto from(InnerProject project, List<CommentResponseDto> comments, UUID ownerId) {
 
         return ProjectDetailResponseDto.of(
                 project.getId(),
@@ -45,9 +45,7 @@ public class ProjectDetailResponseDto {
                         .map(InnerProjectFile::getFile)
                         .toList(),
                 project.getDescription(),
-                project.getComments().stream()
-                        .map(CommentResponseDto::from)
-                        .toList(),
+                comments,
                 ownerId
         );
     }
