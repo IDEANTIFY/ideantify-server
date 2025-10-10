@@ -18,6 +18,7 @@ public class CommentResponseDto {
     LocalDateTime updatedAt;
     SimpleUserResponse user;
     String content;
+    boolean isDeleted;
     List<CommentResponseDto> comments;
 
     public static CommentResponseDto from(InnerProjectComment comment) {
