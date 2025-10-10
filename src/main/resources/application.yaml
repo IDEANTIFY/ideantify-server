@@ -46,6 +46,11 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+  cloud:
+    aws:
+      region:
+        static: ap-northeast-2
+
 app:
   jwt:
     key: ${JWT_SECRET_KEY}
@@ -54,6 +59,9 @@ app:
       callback:
         google: ${GOOGLE_CALLBACK_URL}
         kakao: ${KAKAO_CALLBACK_URL}
+  sqs:
+    request-queue: ${SQS_REQUEST_QUEUE}
+    response-queue: ${SQS_RESPONSE_QUEUE}
 #logging:
 #  level:
 #    org.springframework.security: TRACE
