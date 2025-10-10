@@ -9,10 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "[User - Follow]")
 @PreAuthorize("isAuthenticated()")
@@ -31,6 +28,17 @@ public class UserFollowController {
     ) {
 
         userService.followUser(me, user);
+        return ApiResponse.ok();
+    }
+
+    @DeleteMapping("/{user}/following")
+    @Operation(summary = "언팔로우")
+    public ApiResponse<Void> unfollowUser(
+            @CurrentUser User me,
+            @DomainParameter(description = "언팔로우할 유저 ID") @PathVariable User user
+    ) {
+
+        userService.unfollowUser(me, user);
         return ApiResponse.ok();
     }
 }

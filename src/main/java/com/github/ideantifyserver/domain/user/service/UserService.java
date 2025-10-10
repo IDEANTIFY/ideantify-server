@@ -7,6 +7,7 @@ import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.entity.UserFollow;
 import com.github.ideantifyserver.domain.user.repository.UserFollowRepository;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
+import com.github.ideantifyserver.global.exception.GlobalExceptions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Limit;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,9 +37,22 @@ public class UserService {
     }
 
     @Transactional
-    @PreAuthorize("#userFollowRepository.existsByFollowerAndFollowing(#me, #user)")
+    @PreAuthorize("#me != #user")
     public void followUser(User me, User user) {
 
+        if (userFollowRepository.existsByFollowerAndFollowing(me, user)) {
+            throw GlobalExceptions.NOT_PERMITTED.toException();
+        }
+
         userFollowRepository.save(UserFollow.builder().follower(me).following(user).build());
+    }
+
+    @Transactional
+    public void unfollowUser(User me, User user) {
+
+        UserFollow userFollow = userFollowRepository.findByFollowerAndFollowing(me, user)
+                .orElseThrow(GlobalExceptions.NOT_PERMITTED::toException);
+
+        userFollowRepository.delete(userFollow);
     }
 }
