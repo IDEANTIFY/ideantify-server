@@ -2,11 +2,13 @@ package com.github.ideantifyserver.domain.project.service;
 
 import com.github.ideantifyserver.domain.keyword.entity.Keyword;
 import com.github.ideantifyserver.domain.keyword.repository.KeywordRepository;
+import com.github.ideantifyserver.domain.project.dto.request.CreateCommentRequestDto;
 import com.github.ideantifyserver.domain.project.dto.request.CreateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.request.UpdateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.response.*;
 import com.github.ideantifyserver.domain.project.entity.*;
 import com.github.ideantifyserver.domain.project.exception.InnerProjectExceptions;
+import com.github.ideantifyserver.domain.project.repository.InnerProjectCommentRepository;
 import com.github.ideantifyserver.domain.project.repository.InnerProjectBookmarkRepository;
 import com.github.ideantifyserver.domain.project.repository.InnerProjectLikeRepository;
 import com.github.ideantifyserver.domain.project.repository.InnerProjectRepository;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class InnerProjectService {
     private final InnerProjectRepository innerProjectRepository;
+    private final InnerProjectCommentRepository innerProjectCommentRepository;
     private final InnerProjectBookmarkRepository innerProjectBookmarkRepository;
     private final InnerProjectLikeRepository innerProjectLikeRepository;
     private final KeywordRepository keywordRepository;
@@ -150,6 +153,21 @@ public class InnerProjectService {
     @Transactional(readOnly = true)
     public ProjectDetailResponseDto getProject(InnerProject project) {
 
+        List<InnerProjectComment> all = innerProjectCommentRepository
+                .findAllByProject_IdOrderByCreatedAtAsc(id);
+
+        Map<UUID, List<InnerProjectComment>> childrenMap = all.stream()
+                .filter(c -> c.getParent() != null)
+                .collect(Collectors.groupingBy(c -> c.getParent().getId(), LinkedHashMap::new, Collectors.toList()));
+
+        List<InnerProjectComment> roots = all.stream()
+                .filter(c -> c.getParent() == null)
+                .toList();
+
+        List<CommentResponseDto> commentResponseDtos = roots.stream()
+                .map(c -> toCommentTreeDto(c, childrenMap))
+                .toList();
+
         UUID ownerId = project.getMembers().stream()
                 .filter(m -> Boolean.TRUE.equals(m.getIsOwner()))
                 .map(m -> m.getUser().getId())
@@ -231,6 +249,89 @@ public class InnerProjectService {
         }
 
         innerProjectRepository.delete(project);
+    }
+  
+      public CreatedCommentResponseDto addComment(UUID projectId, UUID parentId, CreateCommentRequestDto req, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
+        InnerProject project = innerProjectRepository.findById(projectId)
+                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+
+        InnerProjectComment parent = null;
+        if (parentId != null) {
+            parent = innerProjectCommentRepository
+                    .findForUpdateByIdAndProjectId(parentId, projectId)
+                    .orElseThrow(InnerProjectExceptions.COMMENT_PARENT_NOT_FOUND::toException);
+        }
+
+        InnerProjectComment comment = InnerProjectComment.builder()
+                .content(req.getContent())
+                .parent(parent)
+                .user(me)
+                .project(project)
+                .build();
+
+        innerProjectCommentRepository.saveAndFlush(comment);
+
+        return CreatedCommentResponseDto.of(
+                comment.getId(),
+                comment.getCreatedAt(),
+                comment.getUpdatedAt(),
+                CommentUserDto.of(
+                        comment.getUser().getId(),
+                        comment.getUser().getNickname(),
+                        comment.getUser().getAvatar()
+                ),
+                comment.getContent()
+        );
+    }
+
+    @Transactional
+    public CreatedCommentResponseDto updateComment(UUID projectId, UUID commentId, CreateCommentRequestDto req, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
+        InnerProjectComment comment = innerProjectCommentRepository.findByIdAndProject_Id(commentId, projectId)
+                .orElseThrow(InnerProjectExceptions.COMMENT_NOT_FOUND::toException);
+
+        if (comment.isDeleted()) {
+            throw InnerProjectExceptions.COMMENT_ALREADY_DELETED.toException();
+        }
+
+        boolean isAuthor = comment.getUser().getId().equals(me.getId());
+        if (!isAuthor) {
+            throw InnerProjectExceptions.COMMENT_NOT_OWNER.toException();
+        }
+
+        comment.updateContent(req.getContent());
+
+        return CreatedCommentResponseDto.of(
+                comment.getId(),
+                comment.getCreatedAt(),
+                comment.getUpdatedAt(),
+                CommentUserDto.of(
+                        comment.getUser().getId(),
+                        comment.getUser().getNickname(),
+                        comment.getUser().getAvatar()
+                ),
+                comment.getContent()
+        );
+    }
+
+    @Transactional
+    public void deleteComment(UUID projectId, UUID commentId, User me) {
+        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
+
+        InnerProjectComment comment = innerProjectCommentRepository.findByIdAndProject_Id(commentId, projectId)
+                .orElseThrow(InnerProjectExceptions.COMMENT_NOT_FOUND::toException);
+
+        boolean isAuthor = comment.getUser().getId().equals(me.getId());
+        if (!isAuthor) {
+            throw InnerProjectExceptions.COMMENT_NOT_OWNER.toException();
+        }
+
+        if (comment.isDeleted()) return;
+
+        comment.markDeleted();
     }
 
     @Transactional

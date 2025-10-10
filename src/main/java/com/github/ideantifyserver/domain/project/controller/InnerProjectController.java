@@ -1,9 +1,16 @@
 package com.github.ideantifyserver.domain.project.controller;
 
+import com.github.ideantifyserver.domain.project.dto.request.CreateCommentRequestDto;
 import com.github.ideantifyserver.domain.project.dto.request.CreateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.request.UpdateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.response.*;
 import com.github.ideantifyserver.domain.project.entity.InnerProject;
+import com.github.ideantifyserver.domain.project.dto.response.CreatedCommentResponseDto;
+import com.github.ideantifyserver.domain.project.dto.response.ProjectBookmarkResponseDto;
+import com.github.ideantifyserver.domain.project.dto.response.ProjectDetailResponseDto;
+import com.github.ideantifyserver.domain.project.dto.response.ProjectLikeResponseDto;
+import com.github.ideantifyserver.domain.project.dto.response.ProjectListResponseDto;
+import com.github.ideantifyserver.domain.project.dto.response.ProjectResponseDto;
 import com.github.ideantifyserver.domain.project.service.InnerProjectService;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.global.resolver.CurrentUser;
@@ -77,6 +84,39 @@ public class InnerProjectController {
             @CurrentUser User user
     ) {
         innerProjectService.delete(project, user);
+        return ApiResponse.ok();
+    }
+
+    @PostMapping("/{projectId}/comments")
+    @Operation(summary = "프로젝트 댓글 작성")
+    public ApiResponse<CreatedCommentResponseDto> addComment(
+            @PathVariable UUID projectId,
+            @RequestParam(required = false, name = "parent") UUID parentId,
+            @RequestBody @Valid CreateCommentRequestDto req,
+            @AuthenticationPrincipal User user
+    ) {
+        return ApiResponse.ok(innerProjectService.addComment(projectId, parentId, req, user));
+    }
+
+    @PutMapping("/{projectId}/comments/{commentId}")
+    @Operation(summary = "프로젝트 댓글 수정")
+    public ApiResponse<CreatedCommentResponseDto> updateComment(
+            @PathVariable UUID projectId,
+            @PathVariable UUID commentId,
+            @RequestBody @Valid CreateCommentRequestDto req,
+            @AuthenticationPrincipal User user
+    ) {
+        return ApiResponse.ok(innerProjectService.updateComment(projectId, commentId, req, user));
+    }
+
+    @DeleteMapping("/{projectId}/comments/{commentId}")
+    @Operation(summary = "프로젝트 댓글 삭제")
+    public ApiResponse<Void> deleteComment(
+            @PathVariable UUID projectId,
+            @PathVariable UUID commentId,
+            @AuthenticationPrincipal User user
+    ) {
+        innerProjectService.deleteComment(projectId, commentId, user);
         return ApiResponse.ok();
     }
 }
