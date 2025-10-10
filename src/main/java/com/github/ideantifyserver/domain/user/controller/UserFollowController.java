@@ -1,5 +1,6 @@
 package com.github.ideantifyserver.domain.user.controller;
 
+import com.github.ideantifyserver.domain.user.dto.response.SimpleUserResponse;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.service.UserService;
 import com.github.ideantifyserver.global.resolver.CurrentUser;
@@ -10,6 +11,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Tag(name = "[User - Follow]")
 @PreAuthorize("isAuthenticated()")
@@ -40,5 +43,23 @@ public class UserFollowController {
 
         userService.unfollowUser(me, user);
         return ApiResponse.ok();
+    }
+
+    @GetMapping("/me/followers")
+    @Operation(summary = "팔로워 목록 조회")
+    public ApiResponse<List<SimpleUserResponse>> getFollowers(
+            @CurrentUser User me
+    ) {
+
+        return ApiResponse.ok(userService.getFollowers(me));
+    }
+
+    @GetMapping("/me/followings")
+    @Operation(summary = "팔로잉 목록 조회")
+    public ApiResponse<List<SimpleUserResponse>> getFollowings(
+            @CurrentUser User me
+    ) {
+
+        return ApiResponse.ok(userService.getFollowings(me));
     }
 }

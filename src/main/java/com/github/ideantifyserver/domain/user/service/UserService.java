@@ -55,4 +55,24 @@ public class UserService {
 
         userFollowRepository.delete(userFollow);
     }
+
+    public List<SimpleUserResponse> getFollowers(User me) {
+
+        List<UserFollow> follows = userFollowRepository.findByFollower(me);
+
+        return follows.stream()
+                .map(UserFollow::getFollower)
+                .map(SimpleUserResponse::from)
+                .toList();
+    }
+
+    public List<SimpleUserResponse> getFollowings(User me) {
+
+        List<UserFollow> followings = userFollowRepository.findByFollowing(me);
+
+        return followings.stream()
+                .map(UserFollow::getFollower)
+                .map(SimpleUserResponse::from)
+                .toList();
+    }
 }
