@@ -2,7 +2,6 @@ package com.github.ideantifyserver.domain.project.service;
 
 import com.github.ideantifyserver.domain.keyword.entity.Keyword;
 import com.github.ideantifyserver.domain.keyword.repository.KeywordRepository;
-import com.github.ideantifyserver.domain.project.dto.request.CreateCommentRequestDto;
 import com.github.ideantifyserver.domain.project.dto.request.CreateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.request.UpdateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.response.*;
@@ -13,15 +12,15 @@ import com.github.ideantifyserver.domain.project.repository.InnerProjectBookmark
 import com.github.ideantifyserver.domain.project.repository.InnerProjectLikeRepository;
 import com.github.ideantifyserver.domain.project.repository.InnerProjectRepository;
 import com.github.ideantifyserver.domain.project.specification.InnerProjectSpecifications;
-import com.github.ideantifyserver.domain.user.dto.response.UserResponseDto;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
-import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
+import com.github.ideantifyserver.global.exception.GlobalExceptions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +29,6 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class InnerProjectService {
     private final InnerProjectRepository innerProjectRepository;
     private final InnerProjectCommentRepository innerProjectCommentRepository;
@@ -50,7 +48,7 @@ public class InnerProjectService {
 
         List<String> files = Optional.ofNullable(req.getFiles()).orElseGet(List::of);
         if (files.stream().anyMatch(f -> f == null || f.isBlank())) {
-            throw InnerProjectExceptions.INVALID_FILE_PATH.toException();
+            throw GlobalExceptions.INVALID_REQUEST.toException();
         }
 
         files.forEach(f -> project.getFiles().add(InnerProjectFile.builder()
@@ -59,15 +57,13 @@ public class InnerProjectService {
                         .build())
                 );
 
-        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
-
         Set<UUID> memberIds = new HashSet<>(Optional.ofNullable(req.getMembers()).orElseGet(List::of));
         memberIds.add(me.getId());
 
         List<User> users = memberIds.stream()
                 .map(id -> Optional.ofNullable(id)
                         .flatMap(userRepository::findById)
-                        .orElseThrow(InnerProjectExceptions.INVALID_MEMBER_ID::toException))
+                        .orElseThrow(GlobalExceptions.INVALID_REQUEST::toException))
                 .toList();
 
         for (User u : users) {
@@ -96,23 +92,7 @@ public class InnerProjectService {
         );
 
         InnerProject saved = innerProjectRepository.save(project);
-
-        return ProjectResponseDto.of(
-                saved.getId(),
-                saved.getCreatedAt(),
-                saved.getUpdatedAt(),
-                saved.getImage(),
-                saved.getSubject(),
-                saved.getKeywords().stream()
-                        .map(k -> k.getKeyword().getName())
-                        .toList(),
-                saved.getGithub(),
-                saved.getMembers().stream()
-                        .map(m -> m.getUser().getId())
-                        .toList(),
-                saved.getFiles().stream().map(InnerProjectFile::getFile).toList(),
-                saved.getDescription()
-        );
+        return ProjectResponseDto.from(saved);
     }
 
     private Map<String, Keyword> ensureKeywords(List<String> names) {
@@ -132,62 +112,49 @@ public class InnerProjectService {
         return byName;
     }
 
+    @Transactional(readOnly = true)
     public List<ProjectListResponseDto> getProjectList(
             boolean bookmarked,
             boolean liked,
             boolean owned,
-            UUID userId,
+            User user,
             Pageable pageable,
             User me
     ) {
         boolean needUser = bookmarked || liked || owned;
 
-        UUID targetUserId = null;
+        User targetUser = null;
         if (needUser) {
-            if (userId != null) {
-                targetUserId = userId;
+            if (user != null) {
+                targetUser = user;
             } else {
-                if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
-                targetUserId = me.getId();
+                targetUser = me;
             }
         }
 
         Specification<InnerProject> specification = Specification.allOf();
         if (bookmarked) {
-            specification = specification.and(InnerProjectSpecifications.bookmarkedBy(targetUserId));
+            specification = specification.and(InnerProjectSpecifications.bookmarkedBy(targetUser));
         }
         if (liked) {
-            specification = specification.and(InnerProjectSpecifications.likedBy(targetUserId));
+            specification = specification.and(InnerProjectSpecifications.likedBy(targetUser));
         }
         if (owned) {
-            specification = specification.and(InnerProjectSpecifications.memberOf(targetUserId));
+            specification = specification.and(InnerProjectSpecifications.memberOf(targetUser));
         }
 
         Page<InnerProject> page = innerProjectRepository.findAll(specification, pageable);
 
         return page.stream()
-                .map(p -> ProjectListResponseDto.of(
-                        p.getId(),
-                        p.getImage(),
-                        p.getSubject(),
-                        p.getKeywords().stream()
-                                .map(InnerProjectKeyword::getKeyword)
-                                .map(Keyword::getName)
-                                .toList(),
-                        p.getMembers().stream()
-                                .map(InnerProjectMember::getUser)
-                                .map(BaseSchema::getId)
-                                .toList()
-                ))
+                .map(ProjectListResponseDto::from)
                 .toList();
     }
 
-    public ProjectDetailResponseDto getProject(UUID id) {
-        InnerProject project = innerProjectRepository.findById(id)
-                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
+    @Transactional(readOnly = true)
+    public ProjectDetailResponseDto getProject(InnerProject project) {
 
         List<InnerProjectComment> all = innerProjectCommentRepository
-                .findAllByProject_IdOrderByCreatedAtAsc(id);
+                .findAllByProjectAndDeletedFalseOrderByCreatedAtAsc(project);
 
         Map<UUID, List<InnerProjectComment>> childrenMap = all.stream()
                 .filter(c -> c.getParent() != null)
@@ -197,86 +164,36 @@ public class InnerProjectService {
                 .filter(c -> c.getParent() == null)
                 .toList();
 
-        List<CommentResponseDto> commentResponseDtos = roots.stream()
-                .map(c -> toCommentTreeDto(c, childrenMap))
+        List<CommentResponseDto> comments = roots.stream()
+                .map(c -> CommentResponseDto.from(c, childrenMap))
                 .toList();
 
         UUID ownerId = project.getMembers().stream()
                 .filter(m -> Boolean.TRUE.equals(m.getIsOwner()))
                 .map(m -> m.getUser().getId())
                 .findFirst()
-                .orElseThrow(InnerProjectExceptions.OWNER_NOT_FOUND::toException);
+                .orElseThrow(GlobalExceptions.NOT_FOUND::toException);
 
-        return ProjectDetailResponseDto.of(
-                project.getId(),
-                project.getCreatedAt(),
-                project.getUpdatedAt(),
-                project.getImage(),
-                project.getSubject(),
-                project.getKeywords().stream()
-                        .map(k -> k.getKeyword().getName())
-                        .toList(),
-                project.getGithub(),
-                project.getMembers().stream()
-                        .map(m -> m.getUser().getId())
-                        .toList(),
-                project.getFiles().stream()
-                        .map(InnerProjectFile::getFile)
-                        .toList(),
-                project.getDescription(),
-                commentResponseDtos,
-                ownerId
-        );
-    }
-
-    private CommentResponseDto toCommentTreeDto(
-            InnerProjectComment comment,
-            Map<UUID, List<InnerProjectComment>> childrenMap
-    ) {
-        List<CommentResponseDto> childDtos = childrenMap
-                .getOrDefault(comment.getId(), List.of())
-                .stream()
-                .sorted(Comparator.comparing(InnerProjectComment::getCreatedAt))
-                .map(c -> toCommentTreeDto(c, childrenMap))
-                .toList();
-
-        return CommentResponseDto.of(
-                comment.getId(),
-                comment.getCreatedAt(),
-                comment.getUpdatedAt(),
-                UserResponseDto.of(
-                        comment.getUser().getId(),
-                        comment.getUser().getNickname(),
-                        comment.getUser().getAvatar()
-                ),
-                comment.getContent(),
-                comment.isDeleted(),
-                childDtos
-        );
+        return ProjectDetailResponseDto.from(project, comments, ownerId);
     }
 
     @Transactional
-    public ProjectResponseDto update(UUID id, UpdateProjectRequestDto req, User me) {
-        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
-
-        InnerProject project = innerProjectRepository.findById(id)
-                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
-
+    public ProjectResponseDto update(InnerProject project, UpdateProjectRequestDto req, User me) {
         UUID ownerId = project.getMembers().stream()
                 .filter(m -> Boolean.TRUE.equals(m.getIsOwner()))
                 .map(m -> m.getUser().getId())
                 .findFirst()
-                .orElseThrow(InnerProjectExceptions.OWNER_NOT_FOUND::toException);
+                .orElseThrow(GlobalExceptions.NOT_FOUND::toException);
 
         if (!ownerId.equals(me.getId())) {
-            throw InnerProjectExceptions.NOT_OWNER.toException();
+            throw GlobalExceptions.NOT_PERMITTED.toException();
         }
 
         project.updateBasics(req.getImage(), req.getSubject(), req.getGithub(), req.getDescription());
 
         List<String> files = Optional.ofNullable(req.getFiles()).orElseGet(List::of);
         if (files.stream().anyMatch(f -> f == null || f.isBlank())) {
-            throw InnerProjectExceptions.INVALID_FILE_PATH.toException();
+            throw GlobalExceptions.INVALID_REQUEST.toException();
         }
         List<InnerProjectFile> newFiles = files.stream()
                 .map(f -> InnerProjectFile.builder().file(f).build())
@@ -289,7 +206,7 @@ public class InnerProjectService {
         List<InnerProjectMember> newMembers = memberIds.stream()
                 .map(idOpt -> Optional.ofNullable(idOpt)
                         .flatMap(userRepository::findById)
-                        .orElseThrow(InnerProjectExceptions.INVALID_MEMBER_ID::toException))
+                        .orElseThrow(GlobalExceptions.INVALID_REQUEST::toException))
                 .map(u -> InnerProjectMember.builder()
                         .user(u)
                         .isOwner(u.getId().equals(ownerId))
@@ -305,7 +222,7 @@ public class InnerProjectService {
                 .toList();
 
         if (names.isEmpty() && req.getKeywords() != null && !req.getKeywords().isEmpty()) {
-            throw InnerProjectExceptions.INVALID_KEYWORD.toException();
+            throw GlobalExceptions.INVALID_REQUEST.toException();
         }
 
         Map<String, Keyword> keywordMap = ensureKeywords(names);
@@ -316,132 +233,27 @@ public class InnerProjectService {
                 .toList();
         project.updateKeywords(newKeywords);
 
-        return ProjectResponseDto.of(
-                project.getId(),
-                project.getCreatedAt(),
-                project.getUpdatedAt(),
-                project.getImage(),
-                project.getSubject(),
-                project.getKeywords().stream().map(k -> k.getKeyword().getName()).toList(),
-                project.getGithub(),
-                project.getMembers().stream().map(m -> m.getUser().getId()).toList(),
-                project.getFiles().stream().map(InnerProjectFile::getFile).toList(),
-                project.getDescription()
-        );
+        return ProjectResponseDto.from(project);
     }
 
     @Transactional
-    public void delete(UUID id, User me) {
-        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
-
-        InnerProject project = innerProjectRepository.findById(id)
-                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
-
+    public void delete(InnerProject project, User me) {
         UUID ownerId = project.getMembers().stream()
                 .filter(m -> Boolean.TRUE.equals(m.getIsOwner()))
                 .map(m -> m.getUser().getId())
                 .findFirst()
-                .orElseThrow(InnerProjectExceptions.OWNER_NOT_FOUND::toException);
+                .orElseThrow(GlobalExceptions.NOT_FOUND::toException);
 
         if (!ownerId.equals(me.getId())) {
-            throw InnerProjectExceptions.NOT_OWNER.toException();
+            throw GlobalExceptions.NOT_PERMITTED.toException();
         }
 
         innerProjectRepository.delete(project);
     }
 
     @Transactional
-    public CreatedCommentResponseDto addComment(UUID projectId, UUID parentId, CreateCommentRequestDto req, User me) {
-        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
-
-        InnerProject project = innerProjectRepository.findById(projectId)
-                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
-
-        InnerProjectComment parent = null;
-        if (parentId != null) {
-            parent = innerProjectCommentRepository
-                    .findForUpdateByIdAndProjectId(parentId, projectId)
-                    .orElseThrow(InnerProjectExceptions.COMMENT_PARENT_NOT_FOUND::toException);
-        }
-
-        InnerProjectComment comment = InnerProjectComment.builder()
-                .content(req.getContent())
-                .parent(parent)
-                .user(me)
-                .project(project)
-                .build();
-
-        innerProjectCommentRepository.saveAndFlush(comment);
-
-        return CreatedCommentResponseDto.of(
-                comment.getId(),
-                comment.getCreatedAt(),
-                comment.getUpdatedAt(),
-                CommentUserDto.of(
-                        comment.getUser().getId(),
-                        comment.getUser().getNickname(),
-                        comment.getUser().getAvatar()
-                ),
-                comment.getContent()
-        );
-    }
-
-    @Transactional
-    public CreatedCommentResponseDto updateComment(UUID projectId, UUID commentId, CreateCommentRequestDto req, User me) {
-        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
-
-        InnerProjectComment comment = innerProjectCommentRepository.findByIdAndProject_Id(commentId, projectId)
-                .orElseThrow(InnerProjectExceptions.COMMENT_NOT_FOUND::toException);
-
-        if (comment.isDeleted()) {
-            throw InnerProjectExceptions.COMMENT_ALREADY_DELETED.toException();
-        }
-
-        boolean isAuthor = comment.getUser().getId().equals(me.getId());
-        if (!isAuthor) {
-            throw InnerProjectExceptions.COMMENT_NOT_OWNER.toException();
-        }
-
-        comment.updateContent(req.getContent());
-
-        return CreatedCommentResponseDto.of(
-                comment.getId(),
-                comment.getCreatedAt(),
-                comment.getUpdatedAt(),
-                CommentUserDto.of(
-                        comment.getUser().getId(),
-                        comment.getUser().getNickname(),
-                        comment.getUser().getAvatar()
-                ),
-                comment.getContent()
-        );
-    }
-
-    @Transactional
-    public void deleteComment(UUID projectId, UUID commentId, User me) {
-        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
-
-        InnerProjectComment comment = innerProjectCommentRepository.findByIdAndProject_Id(commentId, projectId)
-                .orElseThrow(InnerProjectExceptions.COMMENT_NOT_FOUND::toException);
-
-        boolean isAuthor = comment.getUser().getId().equals(me.getId());
-        if (!isAuthor) {
-            throw InnerProjectExceptions.COMMENT_NOT_OWNER.toException();
-        }
-
-        if (comment.isDeleted()) return;
-
-        comment.markDeleted();
-    }
-
-    @Transactional
-    public ProjectBookmarkResponseDto bookmarkProject(UUID projectId, User me) {
-        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
-
-        InnerProject project = innerProjectRepository.findById(projectId)
-                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
-
-        if (innerProjectBookmarkRepository.existsByProject_IdAndUser_Id(projectId, me.getId())) {
+    public ProjectBookmarkResponseDto bookmarkProject(InnerProject project, User me) {
+        if (innerProjectBookmarkRepository.existsByProjectAndUser(project, me)) {
             throw InnerProjectExceptions.ALREADY_BOOKMARKED.toException();
         }
 
@@ -456,35 +268,25 @@ public class InnerProjectService {
             throw InnerProjectExceptions.ALREADY_BOOKMARKED.toException();
         }
 
-        long count = innerProjectBookmarkRepository.countByProject_Id(projectId);
+        long count = innerProjectBookmarkRepository.countByProject(project);
 
         return ProjectBookmarkResponseDto.of(true, count);
     }
 
     @Transactional
-    public ProjectBookmarkResponseDto unbookmarkProject(UUID projectId, User me) {
-        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
-
-        innerProjectRepository.findById(projectId)
-                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
-
-        if (innerProjectBookmarkRepository.deleteByProject_IdAndUser_Id(projectId, me.getId()) == 0) {
+    public ProjectBookmarkResponseDto unbookmarkProject(InnerProject project, User me) {
+        if (innerProjectBookmarkRepository.deleteByProjectAndUser(project, me) == 0) {
             throw InnerProjectExceptions.NOT_BOOKMARKED.toException();
         }
 
-        long count = innerProjectBookmarkRepository.countByProject_Id(projectId);
+        long count = innerProjectBookmarkRepository.countByProject(project);
 
         return ProjectBookmarkResponseDto.of(false, count);
     }
 
     @Transactional
-    public ProjectLikeResponseDto likeProject(UUID projectId, User me) {
-        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
-
-        InnerProject project = innerProjectRepository.findById(projectId)
-                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
-
-        if (innerProjectLikeRepository.existsByProject_IdAndUser_Id(projectId, me.getId())) {
+    public ProjectLikeResponseDto likeProject(InnerProject project, User me) {
+        if (innerProjectLikeRepository.existsByProjectAndUser(project, me)) {
             throw InnerProjectExceptions.ALREADY_LIKED.toException();
         }
 
@@ -499,23 +301,52 @@ public class InnerProjectService {
             throw InnerProjectExceptions.ALREADY_LIKED.toException();
         }
 
-        long count = innerProjectLikeRepository.countByProject_Id(projectId);
+        long count = innerProjectLikeRepository.countByProject(project);
         return ProjectLikeResponseDto.of(true, count);
     }
 
     @Transactional
-    public ProjectLikeResponseDto unlikeProject(UUID projectId, User me) {
-        if (me == null) throw InnerProjectExceptions.UNAUTHORIZED.toException();
-
-        innerProjectRepository.findById(projectId)
-                .orElseThrow(InnerProjectExceptions.NOT_FOUND::toException);
-
-        if (innerProjectLikeRepository.deleteByProject_IdAndUser_Id(projectId, me.getId()) == 0) {
+    public ProjectLikeResponseDto unlikeProject(InnerProject project, User me) {
+        if (innerProjectLikeRepository.deleteByProjectAndUser(project, me) == 0) {
             throw InnerProjectExceptions.NOT_LIKED.toException();
         }
 
-        long count = innerProjectLikeRepository.countByProject_Id(projectId);
+        long count = innerProjectLikeRepository.countByProject(project);
 
         return ProjectLikeResponseDto.of(false, count);
+    }
+
+    @Transactional
+    public CreatedCommentResponseDto addComment(InnerProject project, UUID parentId, String content, User me) {
+        InnerProjectComment parent = Optional.ofNullable(parentId)
+                .map(id -> innerProjectCommentRepository
+                        .findForUpdateByIdAndProject(id, project)
+                        .orElseThrow(GlobalExceptions.NOT_FOUND::toException))
+                .orElse(null);
+
+        InnerProjectComment comment = InnerProjectComment.builder()
+                .content(content)
+                .parent(parent)
+                .user(me)
+                .project(project)
+                .build();
+
+        innerProjectCommentRepository.saveAndFlush(comment);
+
+        return CreatedCommentResponseDto.from(comment);
+    }
+
+    @Transactional
+    @PreAuthorize("#project == #comment.project and #comment.user == #me")
+    public CreatedCommentResponseDto updateComment(InnerProject project, InnerProjectComment comment, String content, User me) {
+        comment.updateContent(content);
+        return CreatedCommentResponseDto.from(comment);
+    }
+
+    @Transactional
+    @PreAuthorize("#project == #comment.project and #comment.user == #me")
+    public void deleteComment(InnerProject project, InnerProjectComment comment, User me) {
+        if (comment.isDeleted()) return;
+        comment.markDeleted();
     }
 }

@@ -1,27 +1,27 @@
 package com.github.ideantifyserver.global.security.oauth;
 
 import com.github.ideantifyserver.domain.user.entity.User;
+import com.github.ideantifyserver.domain.user.entity.UserDomain;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 public class CustomOAuth2UserDetails implements UserDetails, OAuth2User {
 
     private final User user;
     private final Map<String, Object> attributes;
+    private final List<UserDomain> domain;
 
-    public CustomOAuth2UserDetails(User user, Map<String, Object> attributes) {
+    public CustomOAuth2UserDetails(User user, Map<String, Object> attributes, List<UserDomain> domain) {
 
         this.user = user;
         this.attributes = attributes;
+        this.domain = domain;
     }
 
     public UUID getId() {
@@ -61,6 +61,6 @@ public class CustomOAuth2UserDetails implements UserDetails, OAuth2User {
 
     public boolean hasKeywords() {
 
-        return user.getKeywords() != null && !user.getKeywords().isEmpty();
+        return domain != null && !domain.isEmpty();
     }
 }
