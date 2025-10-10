@@ -1,5 +1,6 @@
 package com.github.ideantifyserver.domain.user.controller;
 
+import com.github.ideantifyserver.domain.user.dto.request.UpdateProfileRequest;
 import com.github.ideantifyserver.domain.user.dto.response.SimpleUserResponse;
 import com.github.ideantifyserver.domain.user.dto.response.UserResponse;
 import com.github.ideantifyserver.domain.user.entity.User;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -50,5 +52,15 @@ public class UserController {
     ) {
 
         return ApiResponse.ok(userService.searchUsers(query));
+    }
+
+    @PutMapping("/me")
+    @Operation(summary = "내 정보 수정")
+    public ApiResponse<UserResponse> updateMyProfile(
+            @CurrentUser User user,
+            @RequestBody @Valid UpdateProfileRequest request
+    ) {
+
+        return ApiResponse.ok(userService.updateMyProfile(user, request));
     }
 }
