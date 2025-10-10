@@ -38,4 +38,5 @@ public class InnerProjectBookmarkController {
             @CurrentUser User user
     ) {
         return ApiResponse.ok(innerProjectService.unbookmarkProject(project, user));
-    }}
+    }
+}

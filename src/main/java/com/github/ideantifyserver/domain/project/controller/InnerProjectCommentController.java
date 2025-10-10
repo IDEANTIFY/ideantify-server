@@ -10,6 +10,7 @@ import com.github.ideantifyserver.global.response.ApiResponse;
 import com.github.ideantifyserver.global.util.DomainParameter;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,7 +32,7 @@ public class InnerProjectCommentController {
     public ApiResponse<CreatedCommentResponseDto> addComment(
             @DomainParameter(description = "프로젝트 ID") @PathVariable InnerProject project,
             @RequestParam(required = false, name = "parent") UUID parentId,
-            @RequestBody @NotBlank String content,
+            @RequestBody @Valid @NotBlank String content,
             @CurrentUser User user
     ) {
         return ApiResponse.ok(innerProjectService.addComment(project, parentId, content, user));
@@ -42,7 +43,7 @@ public class InnerProjectCommentController {
     public ApiResponse<CreatedCommentResponseDto> updateComment(
             @DomainParameter(description = "프로젝트 ID") @PathVariable InnerProject project,
             @DomainParameter(description = "댓글 ID") @PathVariable InnerProjectComment comment,
-            @RequestBody @NotBlank String content,
+            @RequestBody @Valid @NotBlank String content,
             @CurrentUser User user
     ) {
         return ApiResponse.ok(innerProjectService.updateComment(project, comment, content, user));
