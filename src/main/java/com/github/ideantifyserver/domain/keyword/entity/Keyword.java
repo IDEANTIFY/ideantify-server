@@ -1,6 +1,6 @@
 package com.github.ideantifyserver.domain.keyword.entity;
 
-import com.github.ideantifyserver.domain.ideareport.entity.IdeaReportInput;
+import com.github.ideantifyserver.domain.ideareport.entity.IdeaReportInputKeyword;
 import com.github.ideantifyserver.domain.user.entity.UserDomain;
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import jakarta.persistence.*;
@@ -25,7 +25,7 @@ public class Keyword extends BaseSchema {
     @Builder.Default
     List<UserDomain> userDomains = new ArrayList<>();
 
-    @OneToMany(mappedBy = "keyword", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "keyword", fetch = FetchType.LAZY)
     @Builder.Default
-    List<IdeaReportInput> ideaReportInputs = new ArrayList<>();
+    List<IdeaReportInputKeyword> inputLinks = new ArrayList<>();
 }
