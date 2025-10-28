@@ -40,4 +40,8 @@ public class IdeaReportResult extends BaseSchema {
     @OneToMany(mappedBy = "ideaReport", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     List<ChatRoom> chatRooms = new ArrayList<>();
+
+    public void setInput(IdeaReportInput ideaReportInput) {
+        this.input = ideaReportInput;
+    }
 }

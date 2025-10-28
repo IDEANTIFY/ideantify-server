@@ -1,6 +1,5 @@
 package com.github.ideantifyserver.domain.keyword.entity;
 
-import com.github.ideantifyserver.domain.ideareport.entity.IdeaReportInput;
 import com.github.ideantifyserver.domain.ideareport.entity.IdeaReportInputKeyword;
 import com.github.ideantifyserver.domain.user.entity.UserDomain;
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
