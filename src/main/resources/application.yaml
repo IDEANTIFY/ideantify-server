@@ -48,15 +48,29 @@ spring:
             user-name-attribute: id
 app:
   jwt:
-    key: ${JWT_SECRET_KEY}
+    key: ${JWT_SECRET_KEY:dummySecretKeyForDevelopment1234567890abcdefghijklmnopqrstuvwxyz}
   auth:
     oauth:
       callback:
-        google: ${GOOGLE_CALLBACK_URL}
-        kakao: ${KAKAO_CALLBACK_URL}
+        google: ${GOOGLE_CALLBACK_URL:http://localhost:8080/api/login/oauth2/code/google}
+        kakao: ${KAKAO_CALLBACK_URL:http://localhost:8080/api/login/oauth2/code/kakao}
 #logging:
 #  level:
 #    org.springframework.security: TRACE
 #    org.springframework.security.oauth2: TRACE
 #    org.springframework.web.client.RestTemplate: DEBUG
 #    org.apache.http: DEBUG
+aws:
+  sqs:
+    enabled: ${AWS_SQS_ENABLED:false}
+spring.cloud:
+  aws:
+    region:
+      static: ${AWS_REGION:ap-northeast-2}
+    credentials:
+      access-key: ${AWS_ACCESS_KEY_ID}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
+    sqs:
+      queue:
+        ai-request: ${AWS_SQS_AI_REQUEST_QUEUE_URL}
+        ai-response: ${AWS_SQS_AI_RESPONSE_QUEUE_URL}

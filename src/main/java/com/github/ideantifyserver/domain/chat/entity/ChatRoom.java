@@ -17,6 +17,9 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatRoom extends BaseSchema {
 
+    @Column
+    String title;
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     ChatRoomType type;
