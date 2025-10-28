@@ -49,8 +49,7 @@ public class IdeaReportInput extends BaseSchema {
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "keyword_id", nullable = false)
-    Keyword keyword;
-
+    @OneToMany(mappedBy = "input", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    List<IdeaReportInputKeyword> inputKeywords = new ArrayList<>();
 }
