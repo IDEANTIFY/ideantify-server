@@ -1,6 +1,5 @@
 package com.github.ideantifyserver.domain.ideareport.entity;
 
-import com.github.ideantifyserver.domain.keyword.entity.Keyword;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import jakarta.persistence.*;
@@ -41,9 +40,8 @@ public class IdeaReportInput extends BaseSchema {
     @NotBlank
     String target;
 
-    @OneToMany(mappedBy = "input", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @Builder.Default
-    List<IdeaReportResult> ideaReportResults = new ArrayList<>();
+    @OneToOne(mappedBy = "input", cascade = CascadeType.ALL, orphanRemoval = true)
+    IdeaReportResult result;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

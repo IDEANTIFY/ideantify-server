@@ -29,8 +29,8 @@ public class IdeaReportResult extends BaseSchema {
     @NotBlank
     String analysisNarrative;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idea_report_input_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idea_report_input_id", nullable = false, unique = true)
     IdeaReportInput input;
 
     @OneToMany(mappedBy = "result", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
