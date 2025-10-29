@@ -30,8 +30,11 @@ public class IdeaReportService {
     private final KeywordRepository keywordRepository;
     private final IdeaReportMetadataSqsGateway metadataGateway;
 
-    @Value("${app.sqs.response-queue}")
-    private String responseQueue;
+    @Value("${app.sqs.idea-report.response-queue}")
+    private String ideaReportResponseQueue;
+
+    @Value("${app.sqs.idea-report-metadata.response-queue}")
+    private String ideaReportMetadataResponseQueue;
 
     @Transactional
     public IdeaReportJobIdResponse createAsync(CreateIdeaReportRequestDto request) {
@@ -42,7 +45,7 @@ public class IdeaReportService {
 
         taskRepository.save(task);
 
-        gateway.requestReport(task.getId(), request.getQuery(), responseQueue);
+        gateway.requestReport(task.getId(), request.getQuery(), ideaReportResponseQueue);
 
         return IdeaReportJobIdResponse.of(task.getId());
     }
@@ -65,7 +68,7 @@ public class IdeaReportService {
             for (Keyword k : keywords) input.addKeyword(k);
         }
 
-        metadataGateway.publish(input.getId(), req, responseQueue);
+        metadataGateway.publish(input.getId(), req, ideaReportMetadataResponseQueue);
         return input.getId();
     }
 }

@@ -14,7 +14,7 @@ import java.util.UUID;
 public class IdeaReportSqsGateway {
     private final SqsTemplate sqsTemplate;
 
-    @Value("${app.sqs.request-queue}")
+    @Value("${app.sqs.idea-report.request-queue}")
     private String requestQueue;
 
     private static final String HDR_MESSAGE_TYPE = "messageType";
@@ -36,6 +36,6 @@ public class IdeaReportSqsGateway {
     public static class IdeaReportRequestMessage {
         private UUID jobId;
         private String query;
-        private String replyTo; // 사용 안 할 수도 있지만 계약상 포함
+        private String replyTo;
     }
 }

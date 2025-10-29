@@ -60,8 +60,12 @@ app:
         google: ${GOOGLE_CALLBACK_URL}
         kakao: ${KAKAO_CALLBACK_URL}
   sqs:
-    request-queue: ${SQS_REQUEST_QUEUE}
-    response-queue: ${SQS_RESPONSE_QUEUE}
+    idea-report:
+      request-queue: ${IDEA_REPORT_SQS_REQUEST_QUEUE}
+      response-queue: ${IDEA_REPORT_SQS_RESPONSE_QUEUE}
+    idea-report-metadata:
+      request-queue: ${IDEA_REPORT_METADATA_SQS_REQUEST_QUEUE}
+      response-queue: ${IDEA_REPORT_METADATA_SQS_RESPONSE_QUEUE}
 #logging:
 #  level:
 #    org.springframework.security: TRACE
