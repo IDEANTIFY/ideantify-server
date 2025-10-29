@@ -2,6 +2,7 @@ package com.github.ideantifyserver.domain.ideareport.controller;
 
 import com.github.ideantifyserver.domain.ideareport.dto.request.CreateIdeaReportMetadataRequestDto;
 import com.github.ideantifyserver.domain.ideareport.dto.request.CreateIdeaReportRequestDto;
+import com.github.ideantifyserver.domain.ideareport.dto.response.IdeaReportListResponseDto;
 import com.github.ideantifyserver.domain.ideareport.dto.response.JobIdWebsocketTopicResponseDto;
 import com.github.ideantifyserver.domain.ideareport.service.IdeaReportService;
 import com.github.ideantifyserver.domain.user.entity.User;
@@ -10,11 +11,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -46,5 +45,10 @@ public class IdeaReportController {
                 id,
                 "/topic/idea-reports/metadata/" + id.toString()
         ));
+    }
+
+    @GetMapping("/results")
+    public ApiResponse<List<IdeaReportListResponseDto>> getIdeaReportList(@AuthenticationPrincipal User user) {
+        return ApiResponse.ok(ideaReportService.getIdeaReportList(user));
     }
 }

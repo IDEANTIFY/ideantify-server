@@ -2,9 +2,11 @@ package com.github.ideantifyserver.domain.ideareport.service;
 
 import com.github.ideantifyserver.domain.ideareport.dto.request.CreateIdeaReportMetadataRequestDto;
 import com.github.ideantifyserver.domain.ideareport.dto.request.CreateIdeaReportRequestDto;
+import com.github.ideantifyserver.domain.ideareport.dto.response.IdeaReportListResponseDto;
 import com.github.ideantifyserver.domain.ideareport.entity.IdeaReportInput;
 import com.github.ideantifyserver.domain.ideareport.entity.IdeaReportTask;
 import com.github.ideantifyserver.domain.ideareport.repository.IdeaReportInputRepository;
+import com.github.ideantifyserver.domain.ideareport.repository.IdeaReportResultRepository;
 import com.github.ideantifyserver.domain.ideareport.repository.IdeaReportTaskRepository;
 import com.github.ideantifyserver.domain.ideareport.sqs.IdeaReportMetadataSqsGateway;
 import com.github.ideantifyserver.domain.ideareport.sqs.IdeaReportSqsGateway;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -28,6 +31,8 @@ public class IdeaReportService {
     private final IdeaReportInputRepository inputRepository;
     private final KeywordRepository keywordRepository;
     private final IdeaReportMetadataSqsGateway metadataGateway;
+
+    private final IdeaReportResultRepository resultRepository;
 
     @Value("${app.sqs.idea-report.response-queue}")
     private String ideaReportResponseQueue;
@@ -69,5 +74,15 @@ public class IdeaReportService {
 
         metadataGateway.publish(input.getId(), req, ideaReportMetadataResponseQueue);
         return input.getId();
+    }
+
+    public List<IdeaReportListResponseDto> getIdeaReportList(User user) {
+        return resultRepository.findAllFetchByUser(user).stream()
+                .map(r -> IdeaReportListResponseDto.of(
+                        r.getId(),
+                        r.getInput().getQuery(),
+                        r.getAnalysisNarrative()
+                ))
+                .toList();
     }
 }
