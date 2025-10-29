@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface IdeaReportResultRepository extends JpaRepository<IdeaReportResult, UUID> {
@@ -17,4 +18,13 @@ public interface IdeaReportResultRepository extends JpaRepository<IdeaReportResu
       order by r.createdAt desc
     """)
     List<IdeaReportResult> findAllFetchByUser(@Param("user") User user);
+
+    @Query("""
+        select distinct r
+        from IdeaReportResult r
+          join fetch r.input i
+          left join fetch r.ideaReportResultItems it
+        where r.id = :id
+        """)
+    Optional<IdeaReportResult> findByIdWithInputAndItems(UUID id);
 }

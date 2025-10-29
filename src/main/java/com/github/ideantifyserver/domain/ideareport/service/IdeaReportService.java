@@ -3,8 +3,9 @@ package com.github.ideantifyserver.domain.ideareport.service;
 import com.github.ideantifyserver.domain.ideareport.dto.request.CreateIdeaReportMetadataRequestDto;
 import com.github.ideantifyserver.domain.ideareport.dto.request.CreateIdeaReportRequestDto;
 import com.github.ideantifyserver.domain.ideareport.dto.response.IdeaReportListResponseDto;
-import com.github.ideantifyserver.domain.ideareport.entity.IdeaReportInput;
-import com.github.ideantifyserver.domain.ideareport.entity.IdeaReportTask;
+import com.github.ideantifyserver.domain.ideareport.dto.response.IdeaReportResultDetailResponseDto;
+import com.github.ideantifyserver.domain.ideareport.entity.*;
+import com.github.ideantifyserver.domain.ideareport.exception.IdeaReportExceptions;
 import com.github.ideantifyserver.domain.ideareport.repository.IdeaReportInputRepository;
 import com.github.ideantifyserver.domain.ideareport.repository.IdeaReportResultRepository;
 import com.github.ideantifyserver.domain.ideareport.repository.IdeaReportTaskRepository;
@@ -15,10 +16,13 @@ import com.github.ideantifyserver.domain.keyword.repository.KeywordRepository;
 import com.github.ideantifyserver.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -84,5 +88,48 @@ public class IdeaReportService {
                         r.getAnalysisNarrative()
                 ))
                 .toList();
+    }
+
+    public IdeaReportResultDetailResponseDto getIdeaReportResult(UUID resultId, User user) {
+        IdeaReportResult result = resultRepository.findByIdWithInputAndItems(resultId)
+                .orElseThrow(IdeaReportExceptions.NOT_FOUND::toException);
+
+        if (result.getInput().getUser().getId().equals(user.getId())) {
+            throw IdeaReportExceptions.NOT_OWNER.toException();
+        }
+
+        EvaluationScores evaluationScores = result.getEvaluationScores();
+
+        return IdeaReportResultDetailResponseDto.of(
+                result.getId(),
+                result.getInput().getQuery(),
+                result.getInput().getTarget(),
+                result.getInput().getPurpose(),
+                result.getInput().getDifferentiation(),
+                result.getInput().getTechnology(),
+                result.getInput().getTarget(),
+                evaluationScores.getSimilarity(),
+                evaluationScores.getCreativity(),
+                evaluationScores.getFeasibility(),
+                result.getAnalysisNarrative(),
+                result.getIdeaReportResultItems().stream()
+                        .sorted(
+                                Comparator.comparingDouble(
+                                        (IdeaReportResultItem e) -> Double.parseDouble(e.getScore())
+                                ).reversed()
+                        )
+                        .map(item -> IdeaReportResultDetailResponseDto.ResultItem.builder()
+                                .id(item.getId())
+                                .sourceType(item.getSourceType())
+                                .title(item.getTitle())
+                                .link(item.getLink())
+                                .thumbnail(item.getThumbnail())
+                                .summary(item.getSummary())
+                                .score(item.getScore())
+                                .insight(item.getInsight())
+                                .build()
+                        )
+                        .toList()
+        );
     }
 }
