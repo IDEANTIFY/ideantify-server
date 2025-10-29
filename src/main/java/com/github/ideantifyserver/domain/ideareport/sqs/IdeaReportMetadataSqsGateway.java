@@ -14,7 +14,7 @@ public class IdeaReportMetadataSqsGateway {
 
     private final SqsTemplate sqsTemplate;
 
-    @Value("${app.sqs.request-queue}")
+    @Value("${app.sqs.idea-report-metadata.request-queue}")
     private String requestQueue;
 
     private static final String HDR_TYPE = "messageType";
