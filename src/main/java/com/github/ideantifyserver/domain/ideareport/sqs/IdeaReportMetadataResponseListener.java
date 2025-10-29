@@ -68,6 +68,7 @@ public class IdeaReportMetadataResponseListener {
                 IdeaReportResultItem item = IdeaReportResultItem.builder()
                         .result(result)
                         .sourceType(resultItem.getSourceType() == null ? "" : resultItem.getSourceType())
+                        .title(resultItem.getTitle())
                         .link(resultItem.getLink() == null ? "" : resultItem.getLink())
                         .thumbnail(resultItem.getThumbnail())
                         .summary(resultItem.getSummary() == null ? "" : resultItem.getSummary())
@@ -78,27 +79,27 @@ public class IdeaReportMetadataResponseListener {
             });
 
             ideaReportInput.setResult(result);
-            inputRepository.save(ideaReportInput);
+            IdeaReportInput saved = inputRepository.save(ideaReportInput);
 
             IdeaReportMetadataResponseDto responseDto =
                     IdeaReportMetadataResponseDto.of(
+                            saved.getId(),
                             scores.getSimilarity(),
                             scores.getCreativity(),
                             scores.getFeasibility(),
                             summary.getAnalysisNarrative(),
-                            resultMessage.getDetailedReport()
-                                    .getDetailedResults()
-                                    .stream()
-                                    .map(r -> IdeaReportMetadataResponseDto.ResultItem.builder()
-                                            .sourceType(r.getSourceType())
-                                            .title(r.getTitle())
-                                            .link(r.getLink())
-                                            .thumbnail(r.getThumbnail())
-                                            .summary(r.getSummary())
-                                            .score(r.getScore())
-                                            .insight(r.getInsight())
-                                            .build())
-                                    .toList()
+                            saved.getResult().getIdeaReportResultItems().stream()
+                                    .map(item -> IdeaReportMetadataResponseDto.ResultItem.builder()
+                                            .id(item.getId())
+                                            .sourceType(item.getSourceType())
+                                            .title(item.getTitle())
+                                            .link(item.getLink())
+                                            .thumbnail(item.getThumbnail())
+                                            .summary(item.getSummary())
+                                            .score(item.getScore())
+                                            .insight(item.getInsight())
+                                            .build()
+                                    ).toList()
                     );
 
             messagingTemplate.convertAndSend("/topic/idea-report/metadata/" + inputId, responseDto);
