@@ -25,7 +25,7 @@ public class IdeaReportResponseListener {
     private static final String HDR_MESSAGE_TYPE = "messageType";
     private static final String MESSAGE_TYPE     = "IDEA_REPORT";
 
-    @SqsListener("${app.sqs.response-queue}")
+    @SqsListener("${app.sqs.idea-report.response-queue}")
     public void onResponse(Message<CreateIdeaReportResponseDto> message) {
         MessageHeaders headers = message.getHeaders();
         String type = String.valueOf(headers.get(HDR_MESSAGE_TYPE));

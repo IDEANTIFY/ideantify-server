@@ -32,7 +32,7 @@ public class IdeaReportMetadataResponseListener {
     private static final String TYPE_RESULT = "IDEA_REPORT_RESULT";
 
     @Transactional
-    @SqsListener("${app.sqs.response-queue}")
+    @SqsListener("${app.sqs.idea-report-metadata.response-queue}")
     public void onResponse(Message<String> message) {
         String type = String.valueOf(message.getHeaders().get(HDR_TYPE));
         if (!TYPE_RESULT.equals(type)) return;
