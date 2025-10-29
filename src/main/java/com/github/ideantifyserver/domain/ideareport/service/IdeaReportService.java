@@ -2,7 +2,6 @@ package com.github.ideantifyserver.domain.ideareport.service;
 
 import com.github.ideantifyserver.domain.ideareport.dto.request.CreateIdeaReportMetadataRequestDto;
 import com.github.ideantifyserver.domain.ideareport.dto.request.CreateIdeaReportRequestDto;
-import com.github.ideantifyserver.domain.ideareport.dto.response.IdeaReportJobIdResponse;
 import com.github.ideantifyserver.domain.ideareport.entity.IdeaReportInput;
 import com.github.ideantifyserver.domain.ideareport.entity.IdeaReportTask;
 import com.github.ideantifyserver.domain.ideareport.repository.IdeaReportInputRepository;
@@ -37,7 +36,7 @@ public class IdeaReportService {
     private String ideaReportMetadataResponseQueue;
 
     @Transactional
-    public IdeaReportJobIdResponse createAsync(CreateIdeaReportRequestDto request) {
+    public UUID createAsync(CreateIdeaReportRequestDto request) {
         IdeaReportTask task = IdeaReportTask.builder()
                 .query(request.getQuery())
                 .status(IdeaReportTask.Status.QUEUED)
@@ -47,7 +46,7 @@ public class IdeaReportService {
 
         gateway.requestReport(task.getId(), request.getQuery(), ideaReportResponseQueue);
 
-        return IdeaReportJobIdResponse.of(task.getId());
+        return task.getId();
     }
 
     @Transactional

@@ -9,6 +9,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor(staticName = "of")
 @NoArgsConstructor
-public class IdeaReportJobIdResponse {
-    UUID jobId;
+public class JobIdWebsocketTopicResponseDto {
+    UUID id;
+    String websocketTopic;
 }
