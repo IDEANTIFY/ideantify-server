@@ -2,6 +2,7 @@ package com.github.ideantifyserver.domain.ideareport.sqs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.ideantifyserver.domain.ideareport.dto.response.AiIdeaReportResultMessage;
+import com.github.ideantifyserver.domain.ideareport.dto.response.IdeaReportMetadataResponseDto;
 import com.github.ideantifyserver.domain.ideareport.entity.EvaluationScores;
 import com.github.ideantifyserver.domain.ideareport.entity.IdeaReportInput;
 import com.github.ideantifyserver.domain.ideareport.entity.IdeaReportResult;
@@ -79,7 +80,28 @@ public class IdeaReportMetadataResponseListener {
             ideaReportInput.setResult(result);
             inputRepository.save(ideaReportInput);
 
-            messagingTemplate.convertAndSend("/topic/idea-report/metadata/" + inputId, resultMessage);
+            IdeaReportMetadataResponseDto responseDto =
+                    IdeaReportMetadataResponseDto.of(
+                            scores.getSimilarity(),
+                            scores.getCreativity(),
+                            scores.getFeasibility(),
+                            summary.getAnalysisNarrative(),
+                            resultMessage.getDetailedReport()
+                                    .getDetailedResults()
+                                    .stream()
+                                    .map(r -> IdeaReportMetadataResponseDto.ResultItem.builder()
+                                            .sourceType(r.getSourceType())
+                                            .title(r.getTitle())
+                                            .link(r.getLink())
+                                            .thumbnail(r.getThumbnail())
+                                            .summary(r.getSummary())
+                                            .score(r.getScore())
+                                            .insight(r.getInsight())
+                                            .build())
+                                    .toList()
+                    );
+
+            messagingTemplate.convertAndSend("/topic/idea-report/metadata/" + inputId, responseDto);
             log.info("웹소켓 푸시 완료: /topic/idea-report/metadata/{}", inputId);
         } catch (Exception e) {
             log.error("AI 응답 처리 실패", e);
