@@ -16,6 +16,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.UUID;
 
 @Slf4j
@@ -89,6 +90,11 @@ public class IdeaReportMetadataResponseListener {
                             scores.getFeasibility(),
                             summary.getAnalysisNarrative(),
                             saved.getResult().getIdeaReportResultItems().stream()
+                                    .sorted(
+                                            Comparator.comparingDouble(
+                                                    (IdeaReportResultItem e) -> Double.parseDouble(e.getScore())
+                                            ).reversed()
+                                    )
                                     .map(item -> IdeaReportMetadataResponseDto.ResultItem.builder()
                                             .id(item.getId())
                                             .sourceType(item.getSourceType())
