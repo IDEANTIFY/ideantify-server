@@ -1,6 +1,8 @@
 package com.github.ideantifyserver.domain.user.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -9,8 +11,12 @@ import lombok.Data;
 @AllArgsConstructor
 public class UpdateProfileRequest {
 
+    @NotBlank
     String nickname;
+
     String avatar;
+
+    @Valid
     Profile profile;
 
     @Data

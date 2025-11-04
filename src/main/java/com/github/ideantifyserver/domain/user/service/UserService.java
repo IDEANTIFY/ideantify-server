@@ -5,6 +5,7 @@ import com.github.ideantifyserver.domain.user.dto.request.UpdateProfileRequest;
 import com.github.ideantifyserver.domain.user.dto.response.SimpleUserResponse;
 import com.github.ideantifyserver.domain.user.dto.response.UserResponse;
 import com.github.ideantifyserver.domain.user.entity.User;
+import com.github.ideantifyserver.domain.user.exception.UserExceptions;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Limit;
@@ -35,11 +36,25 @@ public class UserService {
     @Transactional
     public UserResponse updateMyProfile(User user, UpdateProfileRequest request) {
 
-        user.setNickname(request.getNickname());
-        user.setAvatar(request.getAvatar());
-        user.getSocial().setGithub(request.getProfile().getGithub());
-        user.getSocial().setLinkedin(request.getProfile().getLinkedin());
-        user.getSocial().setInstagram(request.getProfile().getInstagram());
+        if (request.getNickname() != null && !request.getNickname().equals(user.getNickname())) {
+            if (userRepository.findByNickname(request.getNickname()).isPresent()) {
+                throw UserExceptions.ALREADY_EXIT.toException();
+            }
+            user.updateNickname(request.getNickname());
+        }
+
+        if (request.getAvatar() != null) {
+            user.updateAvatar(request.getAvatar());
+        }
+
+        if (user.getSocial() != null && request.getProfile() != null) {
+
+            user.getSocial().updateSocialLinks(
+                    request.getProfile().getGithub(),
+                    request.getProfile().getLinkedin(),
+                    request.getProfile().getInstagram()
+            );
+        }
 
         return UserResponse.from(userRepository.save(user));
     }
