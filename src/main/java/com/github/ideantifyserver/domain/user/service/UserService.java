@@ -58,7 +58,7 @@ public class UserService {
 
     public List<SimpleUserResponse> getFollowers(User me) {
 
-        List<UserFollow> follows = userFollowRepository.findByFollower(me);
+        List<UserFollow> follows = userFollowRepository.findByFollowing(me);
 
         return follows.stream()
                 .map(UserFollow::getFollower)
@@ -68,10 +68,10 @@ public class UserService {
 
     public List<SimpleUserResponse> getFollowings(User me) {
 
-        List<UserFollow> followings = userFollowRepository.findByFollowing(me);
+        List<UserFollow> followings = userFollowRepository.findByFollower(me);
 
         return followings.stream()
-                .map(UserFollow::getFollower)
+                .map(UserFollow::getFollowing)
                 .map(SimpleUserResponse::from)
                 .toList();
     }
