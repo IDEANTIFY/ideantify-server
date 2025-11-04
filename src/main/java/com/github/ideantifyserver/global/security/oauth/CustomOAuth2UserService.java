@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +54,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     private User createUserWithProvider(OAuth2UserInfo oAuth2UserInfo) {
 
         User user = userRepository.save(User.builder()
-                .nickname(oAuth2UserInfo.getNickname())
+                .nickname(oAuth2UserInfo.getNickname() + UUID.randomUUID().toString().substring(0, 8))
                 .email(oAuth2UserInfo.getEmail())
                 .avatar(oAuth2UserInfo.getAvatar())
                 .build());
