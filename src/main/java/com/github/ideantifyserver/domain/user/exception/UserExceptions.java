@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum UserExceptions implements ApiExceptionCode {
 
-    ALREADY_EXIT("USER_001", "이미 사용 중인 닉네임입니다."),
+    ALREADY_EXIST("USER_001", "이미 사용 중인 닉네임입니다."),
     ;
 
     private final String code;

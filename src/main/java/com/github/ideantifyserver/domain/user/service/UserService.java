@@ -38,7 +38,7 @@ public class UserService {
 
         if (request.getNickname() != null && !request.getNickname().equals(user.getNickname())) {
             if (userRepository.findByNickname(request.getNickname()).isPresent()) {
-                throw UserExceptions.ALREADY_EXIT.toException();
+                throw UserExceptions.ALREADY_EXIST.toException();
             }
             user.updateNickname(request.getNickname());
         }
