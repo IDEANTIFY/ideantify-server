@@ -20,7 +20,7 @@ import java.util.UUID;
 public class IdeaReportResponseListener {
     private final IdeaReportTaskRepository ideaReportTaskRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
     private static final String HDR_MESSAGE_TYPE = "messageType";
     private static final String MESSAGE_TYPE     = "IDEA_REPORT";

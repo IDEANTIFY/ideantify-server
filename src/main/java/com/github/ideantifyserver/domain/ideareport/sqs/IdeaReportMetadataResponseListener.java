@@ -68,13 +68,13 @@ public class IdeaReportMetadataResponseListener {
             resultMessage.getDetailedReport().getDetailedResults().forEach(resultItem -> {
                 IdeaReportResultItem item = IdeaReportResultItem.builder()
                         .result(result)
-                        .sourceType(resultItem.getSourceType() == null ? "" : resultItem.getSourceType())
-                        .title(resultItem.getTitle())
-                        .link(resultItem.getLink() == null ? "" : resultItem.getLink())
-                        .thumbnail(resultItem.getThumbnail())
-                        .summary(resultItem.getSummary() == null ? "" : resultItem.getSummary())
-                        .score(resultItem.getScore() == null ? "" : String.valueOf(resultItem.getScore()))
-                        .insight(resultItem.getInsight() == null ? "" : resultItem.getInsight())
+                        .sourceType(resultItem.getSourceType() == null ? "-" : resultItem.getSourceType())
+                        .title(resultItem.getTitle() == null ? "-" : resultItem.getTitle())
+                        .link(resultItem.getLink() == null ? "-" : resultItem.getLink())
+                        .thumbnail(resultItem.getThumbnail() == null ? "-" : resultItem.getThumbnail())
+                        .summary(resultItem.getSummary() == null ? "-" : resultItem.getSummary())
+                        .score(resultItem.getScore() == null ? "0" : String.valueOf(resultItem.getScore()))
+                        .insight(resultItem.getInsight() == null ? "-" : resultItem.getInsight())
                         .build();
                 result.getIdeaReportResultItems().add(item);
             });

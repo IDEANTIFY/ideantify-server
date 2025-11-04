@@ -2,7 +2,7 @@ package com.github.ideantifyserver.domain.ideareport.repository;
 
 import com.github.ideantifyserver.domain.ideareport.entity.IdeaReportResult;
 import com.github.ideantifyserver.domain.user.entity.User;
-import io.lettuce.core.dynamic.annotation.Param;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -26,5 +26,5 @@ public interface IdeaReportResultRepository extends JpaRepository<IdeaReportResu
           left join fetch r.ideaReportResultItems it
         where r.id = :id
         """)
-    Optional<IdeaReportResult> findByIdWithInputAndItems(UUID id);
+    Optional<IdeaReportResult> findByIdWithInputAndItems(@Param("id") UUID id);
 }

@@ -92,7 +92,7 @@ public class IdeaReportService {
         IdeaReportResult result = resultRepository.findByIdWithInputAndItems(resultId)
                 .orElseThrow(IdeaReportExceptions.NOT_FOUND::toException);
 
-        if (result.getInput().getUser().getId().equals(user.getId())) {
+        if (!result.getInput().getUser().getId().equals(user.getId())) {
             throw IdeaReportExceptions.NOT_OWNER.toException();
         }
 
@@ -101,7 +101,7 @@ public class IdeaReportService {
         return IdeaReportResultDetailResponseDto.of(
                 result.getId(),
                 result.getInput().getQuery(),
-                result.getInput().getTarget(),
+                result.getInput().getSummary(),
                 result.getInput().getPurpose(),
                 result.getInput().getDifferentiation(),
                 result.getInput().getTechnology(),
