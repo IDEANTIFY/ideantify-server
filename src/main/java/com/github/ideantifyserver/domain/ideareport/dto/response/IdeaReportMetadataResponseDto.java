@@ -6,11 +6,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor(staticName = "of")
 @NoArgsConstructor
 public class IdeaReportMetadataResponseDto {
+    UUID id;
     Integer similarity;
     Integer creativity;
     Integer feasibility;
@@ -22,12 +24,13 @@ public class IdeaReportMetadataResponseDto {
     @AllArgsConstructor
     @Builder
     public static class ResultItem {
+        UUID id;
         String sourceType;
         String title;
         String link;
         String thumbnail;
         String summary;
-        Double score;
+        String score;
         String insight;
     }
 }
