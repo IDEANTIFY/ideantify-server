@@ -15,6 +15,7 @@ public class AiChatRequestMessage {
     private UUID chatRoomId;
     private UUID userId;
     private String content;
+    private String context;  // IdeaReport의 배경 정보
     private RequestType type;
 
     public enum RequestType {

@@ -56,8 +56,8 @@ app:
   auth:
     oauth:
       callback:
-        google: ${GOOGLE_CALLBACK_URL:http://localhost:8080/api/login/oauth2/code/google}
-        kakao: ${KAKAO_CALLBACK_URL:http://localhost:8080/api/login/oauth2/code/kakao}
+        google: ${GOOGLE_CALLBACK_URL:http://localhost:3000/auth/callback}
+        kakao: ${KAKAO_CALLBACK_URL:http://localhost:3000/auth/callback}
 #logging:
 #  level:
 #    org.springframework.security: TRACE
@@ -66,7 +66,7 @@ app:
 #    org.apache.http: DEBUG
 aws:
   sqs:
-    enabled: ${AWS_SQS_ENABLED:false}
+    enabled: ${AWS_SQS_ENABLED:true}
 spring.cloud:
   aws:
     region:
