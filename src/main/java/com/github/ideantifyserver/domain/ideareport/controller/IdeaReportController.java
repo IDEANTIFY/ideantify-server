@@ -25,7 +25,7 @@ public class IdeaReportController {
 
     private final IdeaReportService ideaReportService;
 
-    @PostMapping
+    @PostMapping("/metadata")
     public ApiResponse<JobIdWebsocketTopicResponseDto> createIdeaReportMetadata(@RequestBody @Valid CreateIdeaReportMetadataRequestDto requestDto) {
         UUID id = ideaReportService.createMetadata(requestDto);
         return ApiResponse.ok(
@@ -36,7 +36,7 @@ public class IdeaReportController {
         );
     }
 
-    @PostMapping("/metadata")
+    @PostMapping
     public ApiResponse<JobIdWebsocketTopicResponseDto> createIdeaReport(
             @RequestBody @Valid CreateIdeaReportRequestDto requestDto,
             @AuthenticationPrincipal User user
