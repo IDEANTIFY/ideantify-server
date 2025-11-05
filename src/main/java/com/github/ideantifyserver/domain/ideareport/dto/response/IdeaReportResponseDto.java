@@ -11,7 +11,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor(staticName = "of")
 @NoArgsConstructor
-public class IdeaReportMetadataResponseDto {
+public class IdeaReportResponseDto {
     UUID id;
     Integer similarity;
     Integer creativity;

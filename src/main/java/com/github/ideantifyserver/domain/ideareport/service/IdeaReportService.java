@@ -1,7 +1,7 @@
 package com.github.ideantifyserver.domain.ideareport.service;
 
-import com.github.ideantifyserver.domain.ideareport.dto.request.CreateIdeaReportMetadataRequestDto;
 import com.github.ideantifyserver.domain.ideareport.dto.request.CreateIdeaReportRequestDto;
+import com.github.ideantifyserver.domain.ideareport.dto.request.CreateIdeaReportMetadataRequestDto;
 import com.github.ideantifyserver.domain.ideareport.dto.response.IdeaReportListResponseDto;
 import com.github.ideantifyserver.domain.ideareport.dto.response.IdeaReportResultDetailResponseDto;
 import com.github.ideantifyserver.domain.ideareport.entity.*;
@@ -9,8 +9,8 @@ import com.github.ideantifyserver.domain.ideareport.exception.IdeaReportExceptio
 import com.github.ideantifyserver.domain.ideareport.repository.IdeaReportInputRepository;
 import com.github.ideantifyserver.domain.ideareport.repository.IdeaReportResultRepository;
 import com.github.ideantifyserver.domain.ideareport.repository.IdeaReportTaskRepository;
-import com.github.ideantifyserver.domain.ideareport.sqs.IdeaReportMetadataSqsGateway;
 import com.github.ideantifyserver.domain.ideareport.sqs.IdeaReportSqsGateway;
+import com.github.ideantifyserver.domain.ideareport.sqs.IdeaReportMetadataSqsGateway;
 import com.github.ideantifyserver.domain.keyword.entity.Keyword;
 import com.github.ideantifyserver.domain.keyword.repository.KeywordRepository;
 import com.github.ideantifyserver.domain.user.entity.User;
@@ -27,12 +27,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class IdeaReportService {
-    private final IdeaReportSqsGateway gateway;
+    private final IdeaReportMetadataSqsGateway gateway;
     private final IdeaReportTaskRepository taskRepository;
 
     private final IdeaReportInputRepository inputRepository;
     private final KeywordRepository keywordRepository;
-    private final IdeaReportMetadataSqsGateway metadataGateway;
+    private final IdeaReportSqsGateway metadataGateway;
 
     private final IdeaReportResultRepository resultRepository;
 
@@ -43,7 +43,7 @@ public class IdeaReportService {
     private String ideaReportMetadataResponseQueue;
 
     @Transactional
-    public UUID createAsync(CreateIdeaReportRequestDto request) {
+    public UUID createMetadata(CreateIdeaReportMetadataRequestDto request) {
         IdeaReportTask task = IdeaReportTask.builder()
                 .query(request.getQuery())
                 .status(IdeaReportTask.Status.QUEUED)
@@ -51,13 +51,13 @@ public class IdeaReportService {
 
         taskRepository.save(task);
 
-        gateway.requestReport(task.getId(), request.getQuery(), ideaReportResponseQueue);
+        gateway.requestMetadata(task.getId(), request.getQuery(), ideaReportMetadataResponseQueue);
 
         return task.getId();
     }
 
     @Transactional
-    public UUID createIdeaReportMetadata(CreateIdeaReportMetadataRequestDto req, User user) {
+    public UUID createIdeaReport(CreateIdeaReportRequestDto req, User user) {
         IdeaReportInput input = IdeaReportInput.builder()
                 .query(req.getQuery())
                 .summary(req.getSummary())

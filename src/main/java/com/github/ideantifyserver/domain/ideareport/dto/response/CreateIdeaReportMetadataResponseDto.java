@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor(staticName = "of")
 @NoArgsConstructor
-public class CreateIdeaReportResponseDto {
+public class CreateIdeaReportMetadataResponseDto {
     String query;
     String summary;
     String purpose;

@@ -5,6 +5,7 @@ import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public class IdeaReportResult extends BaseSchema {
     EvaluationScores evaluationScores;
 
     @Column(nullable = false)
-    @NotBlank
+    @NotNull
     Integer totalSimilarCases;
 
     @Column(nullable = false)

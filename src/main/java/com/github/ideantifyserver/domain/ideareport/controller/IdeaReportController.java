@@ -1,7 +1,7 @@
 package com.github.ideantifyserver.domain.ideareport.controller;
 
-import com.github.ideantifyserver.domain.ideareport.dto.request.CreateIdeaReportMetadataRequestDto;
 import com.github.ideantifyserver.domain.ideareport.dto.request.CreateIdeaReportRequestDto;
+import com.github.ideantifyserver.domain.ideareport.dto.request.CreateIdeaReportMetadataRequestDto;
 import com.github.ideantifyserver.domain.ideareport.dto.response.IdeaReportListResponseDto;
 import com.github.ideantifyserver.domain.ideareport.dto.response.IdeaReportResultDetailResponseDto;
 import com.github.ideantifyserver.domain.ideareport.dto.response.JobIdWebsocketTopicResponseDto;
@@ -26,25 +26,25 @@ public class IdeaReportController {
     private final IdeaReportService ideaReportService;
 
     @PostMapping
-    public ApiResponse<JobIdWebsocketTopicResponseDto> createIdeaReport(@RequestBody @Valid CreateIdeaReportRequestDto requestDto) {
-        UUID id = ideaReportService.createAsync(requestDto);
+    public ApiResponse<JobIdWebsocketTopicResponseDto> createIdeaReportMetadata(@RequestBody @Valid CreateIdeaReportMetadataRequestDto requestDto) {
+        UUID id = ideaReportService.createMetadata(requestDto);
         return ApiResponse.ok(
                 JobIdWebsocketTopicResponseDto.of(
                         id,
-                        "/topic/idea-reports/" + id.toString()
+                        "/topic/idea-reports/metadata/" + id.toString()
                 )
         );
     }
 
     @PostMapping("/metadata")
-    public ApiResponse<JobIdWebsocketTopicResponseDto> createMetadata(
-            @RequestBody @Valid CreateIdeaReportMetadataRequestDto requestDto,
+    public ApiResponse<JobIdWebsocketTopicResponseDto> createIdeaReport(
+            @RequestBody @Valid CreateIdeaReportRequestDto requestDto,
             @AuthenticationPrincipal User user
     ) {
-        UUID id = ideaReportService.createIdeaReportMetadata(requestDto, user);
+        UUID id = ideaReportService.createIdeaReport(requestDto, user);
         return ApiResponse.ok(JobIdWebsocketTopicResponseDto.of(
                 id,
-                "/topic/idea-reports/metadata/" + id.toString()
+                "/topic/idea-reports/" + id.toString()
         ));
     }
 
