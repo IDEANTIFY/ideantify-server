@@ -11,6 +11,7 @@ import io.awspring.cloud.sqs.annotation.SqsListener;
 import io.awspring.cloud.sqs.operations.SqsTemplate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -37,6 +38,7 @@ public class SqsService {
             sqsTemplate.send(to -> to
                     .queue(queueUrl)
                     .payload(messageBody)
+                    .header("chatRoomId", message.getChatRoomId().toString())
             );
         } catch (JsonProcessingException e) {
             throw ChatExceptionCode.SQS_MESSAGE_SEND_FAILED.toException();
@@ -46,9 +48,17 @@ public class SqsService {
     }
 
     @SqsListener("${spring.cloud.aws.sqs.queue.user-chat-response}")
-    public void receiveUserChatResponse(String messageBody) {
+    public void receiveUserChatResponse(Message<String> message) {
         try {
+            String headerChatRoomId = (String) message.getHeaders().get("chatRoomId");
+
+            String messageBody = message.getPayload();
             AiChatResponseMessage response = objectMapper.readValue(messageBody, AiChatResponseMessage.class);
+
+            if (headerChatRoomId != null && !headerChatRoomId.equals(response.getChatRoomId().toString())) {
+                throw ChatExceptionCode.CHAT_ROOM_ID_MISMATCH.toException();
+            }
+
             aiResponseProcessor.processAiResponse(response);
         } catch (JsonProcessingException e) {
             throw ChatExceptionCode.SQS_MESSAGE_PARSE_FAILED.toException();
@@ -58,9 +68,17 @@ public class SqsService {
     }
 
     @SqsListener("${spring.cloud.aws.sqs.queue.develop-chat-response}")
-    public void receiveDevelopChatResponse(String messageBody) {
+    public void receiveDevelopChatResponse(Message<String> message) {
         try {
+            String headerChatRoomId = (String) message.getHeaders().get("chatRoomId");
+
+            String messageBody = message.getPayload();
             AiChatResponseMessage response = objectMapper.readValue(messageBody, AiChatResponseMessage.class);
+
+            if (headerChatRoomId != null && !headerChatRoomId.equals(response.getChatRoomId().toString())) {
+                throw ChatExceptionCode.CHAT_ROOM_ID_MISMATCH.toException();
+            }
+
             aiResponseProcessor.processAiResponse(response);
         } catch (JsonProcessingException e) {
             throw ChatExceptionCode.SQS_MESSAGE_PARSE_FAILED.toException();
@@ -70,9 +88,20 @@ public class SqsService {
     }
 
     @SqsListener("${spring.cloud.aws.sqs.queue.idea-report-chat-response}")
-    public void receiveIdeaReportChatResponse(String messageBody) {
+    public void receiveIdeaReportChatResponse(Message<String> message) {
         try {
+            // 헤더에서 chatRoomId 추출
+            String headerChatRoomId = (String) message.getHeaders().get("chatRoomId");
+
+            // Payload 파싱
+            String messageBody = message.getPayload();
             AiChatResponseMessage response = objectMapper.readValue(messageBody, AiChatResponseMessage.class);
+
+            // 헤더와 payload의 chatRoomId 일치 검증
+            if (headerChatRoomId != null && !headerChatRoomId.equals(response.getChatRoomId().toString())) {
+                throw ChatExceptionCode.CHAT_ROOM_ID_MISMATCH.toException();
+            }
+
             aiResponseProcessor.processAiResponse(response);
         } catch (JsonProcessingException e) {
             throw ChatExceptionCode.SQS_MESSAGE_PARSE_FAILED.toException();

@@ -54,7 +54,7 @@ public class AiResponseProcessor {
                 .build();
 
         messagingTemplate.convertAndSend(
-                "/topic/users/rooms/" + response.getChatRoomId(),
+                "/topic/chatRooms/" + response.getChatRoomId(),
                 webSocketMessage
         );
     }
