@@ -1,0 +1,65 @@
+package com.github.ideantifyserver.domain.user.controller;
+
+import com.github.ideantifyserver.domain.user.dto.response.SimpleUserResponse;
+import com.github.ideantifyserver.domain.user.entity.User;
+import com.github.ideantifyserver.domain.user.service.UserService;
+import com.github.ideantifyserver.global.resolver.CurrentUser;
+import com.github.ideantifyserver.global.response.ApiResponse;
+import com.github.ideantifyserver.global.util.DomainParameter;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@Tag(name = "[User - Follow]")
+@PreAuthorize("isAuthenticated()")
+@RestController
+@RequestMapping("/users")
+@RequiredArgsConstructor
+public class UserFollowController {
+
+    private final UserService userService;
+
+    @PostMapping("/{user}/following")
+    @Operation(summary = "팔로우")
+    public ApiResponse<Void> followUser(
+            @CurrentUser User me,
+            @DomainParameter(description = "팔로우할 유저 ID") @PathVariable User user
+    ) {
+
+        userService.followUser(me, user);
+        return ApiResponse.ok();
+    }
+
+    @DeleteMapping("/{user}/following")
+    @Operation(summary = "언팔로우")
+    public ApiResponse<Void> unfollowUser(
+            @CurrentUser User me,
+            @DomainParameter(description = "언팔로우할 유저 ID") @PathVariable User user
+    ) {
+
+        userService.unfollowUser(me, user);
+        return ApiResponse.ok();
+    }
+
+    @GetMapping("/me/followers")
+    @Operation(summary = "팔로워 목록 조회")
+    public ApiResponse<List<SimpleUserResponse>> getFollowers(
+            @CurrentUser User me
+    ) {
+
+        return ApiResponse.ok(userService.getFollowers(me));
+    }
+
+    @GetMapping("/me/followings")
+    @Operation(summary = "팔로잉 목록 조회")
+    public ApiResponse<List<SimpleUserResponse>> getFollowings(
+            @CurrentUser User me
+    ) {
+
+        return ApiResponse.ok(userService.getFollowings(me));
+    }
+}
