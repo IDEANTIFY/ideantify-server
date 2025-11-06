@@ -9,7 +9,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     open-in-view: true
     show-sql: true
     properties:
@@ -54,6 +54,8 @@ spring:
     aws:
       region:
         static: ap-northeast-2
+      s3:
+        bucket: ${AWS_S3_BUCKET_NAME}
       credentials:
         access-key: ${AWS_ACCESS_KEY}
         secret-key: ${AWS_SECRET_KEY}
@@ -73,6 +75,7 @@ app:
     idea-report-metadata:
       request-queue: ${IDEA_REPORT_METADATA_SQS_REQUEST_QUEUE}
       response-queue: ${IDEA_REPORT_METADATA_SQS_RESPONSE_QUEUE}
+
 #logging:
 #  level:
 #    org.springframework.security: TRACE
