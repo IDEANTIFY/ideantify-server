@@ -27,6 +27,7 @@ public class IdeaReportResponseDto {
         UUID id;
         String sourceType;
         String title;
+        String keyword;
         String link;
         String thumbnail;
         String summary;

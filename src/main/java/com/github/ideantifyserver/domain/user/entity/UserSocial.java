@@ -23,4 +23,10 @@ public class UserSocial extends BaseSchema {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     User user;
+
+    public void updateSocialLinks(String github, String linkedin, String instagram) {
+        this.github = github;
+        this.linkedin = linkedin;
+        this.instagram = instagram;
+    }
 }

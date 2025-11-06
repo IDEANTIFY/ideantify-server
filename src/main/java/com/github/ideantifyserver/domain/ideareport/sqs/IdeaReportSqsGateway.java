@@ -17,15 +17,15 @@ public class IdeaReportSqsGateway {
     @Value("${app.sqs.idea-report.request-queue}")
     private String requestQueue;
 
-    private static final String HDR_TYPE = "messageType";
-    private static final String HDR_INPUT_ID = "inputId";
+    private static final String HDR_MESSAGE_TYPE = "messageType";
+    private static final String MESSAGE_TYPE     = "IDEA_REPORT_METADATA";
 
     public void publish(UUID inputId, CreateIdeaReportRequestDto dto, String responseQueue) {
         sqsTemplate.send(to -> to
                 .queue(requestQueue)
                 .payload(dto)
-                .header(HDR_TYPE, "IDEA_REPORT_REQUEST")
-                .header(HDR_INPUT_ID, inputId.toString())
+                .header(HDR_MESSAGE_TYPE, MESSAGE_TYPE)
+                .header("jobId", inputId.toString())
                 .header("responseQueue", responseQueue)
         );
     }

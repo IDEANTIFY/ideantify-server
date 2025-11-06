@@ -1,8 +1,10 @@
 package com.github.ideantifyserver.global.security.oauth;
 
 import com.github.ideantifyserver.domain.user.entity.User;
+import com.github.ideantifyserver.domain.user.entity.UserDomain;
 import com.github.ideantifyserver.domain.user.entity.UserProvider;
 import com.github.ideantifyserver.domain.user.entity.UserSocial;
+import com.github.ideantifyserver.domain.user.repository.UserDomainRepository;
 import com.github.ideantifyserver.domain.user.repository.UserProviderRepository;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
 import com.github.ideantifyserver.domain.user.repository.UserSocialRepository;
@@ -15,6 +17,9 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
@@ -22,6 +27,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     private final UserRepository userRepository;
     private final UserProviderRepository userProviderRepository;
     private final UserSocialRepository userSocialRepository;
+    private final UserDomainRepository userDomainRepository;
 
     @Override
     @Transactional
@@ -40,13 +46,15 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         User user = userRepository.findByEmail(oAuth2UserInfo.getEmail())
                 .orElseGet(() -> createUserWithProvider(oAuth2UserInfo));
 
-        return new CustomOAuth2UserDetails(user, oAuth2User.getAttributes());
+        List<UserDomain> domain = userDomainRepository.findByUser(user);
+
+        return new CustomOAuth2UserDetails(user, oAuth2User.getAttributes(), domain);
     }
 
     private User createUserWithProvider(OAuth2UserInfo oAuth2UserInfo) {
 
         User user = userRepository.save(User.builder()
-                .nickname(oAuth2UserInfo.getNickname())
+                .nickname(oAuth2UserInfo.getNickname() + UUID.randomUUID().toString().substring(0, 8))
                 .email(oAuth2UserInfo.getEmail())
                 .avatar(oAuth2UserInfo.getAvatar())
                 .build());

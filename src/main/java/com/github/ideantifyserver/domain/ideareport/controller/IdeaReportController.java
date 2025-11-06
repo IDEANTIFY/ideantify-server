@@ -7,11 +7,11 @@ import com.github.ideantifyserver.domain.ideareport.dto.response.IdeaReportResul
 import com.github.ideantifyserver.domain.ideareport.dto.response.JobIdWebsocketTopicResponseDto;
 import com.github.ideantifyserver.domain.ideareport.service.IdeaReportService;
 import com.github.ideantifyserver.domain.user.entity.User;
+import com.github.ideantifyserver.global.resolver.CurrentUser;
 import com.github.ideantifyserver.global.response.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class IdeaReportController {
     @PostMapping
     public ApiResponse<JobIdWebsocketTopicResponseDto> createIdeaReport(
             @RequestBody @Valid CreateIdeaReportRequestDto requestDto,
-            @AuthenticationPrincipal User user
+            @CurrentUser(required = false) User user
     ) {
         UUID id = ideaReportService.createIdeaReport(requestDto, user);
         return ApiResponse.ok(JobIdWebsocketTopicResponseDto.of(
@@ -49,13 +49,13 @@ public class IdeaReportController {
     }
 
     @GetMapping("/results")
-    public ApiResponse<List<IdeaReportListResponseDto>> getIdeaReportList(@AuthenticationPrincipal User user) {
+    public ApiResponse<List<IdeaReportListResponseDto>> getIdeaReportList(@CurrentUser(required = false) User user) {
         return ApiResponse.ok(ideaReportService.getIdeaReportList(user));
     }
 
     @GetMapping("/results/{resultId}")
     public ApiResponse<IdeaReportResultDetailResponseDto> getIdeaReportResult(
-            @PathVariable UUID resultId, @AuthenticationPrincipal User user
+            @PathVariable UUID resultId, @CurrentUser(required = false) User user
     ) {
         return ApiResponse.ok(ideaReportService.getIdeaReportResult(resultId, user));
     }

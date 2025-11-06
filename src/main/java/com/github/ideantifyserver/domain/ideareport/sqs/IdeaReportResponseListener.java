@@ -70,6 +70,7 @@ public class IdeaReportResponseListener {
                         .result(result)
                         .sourceType(resultItem.getSourceType() == null ? "-" : resultItem.getSourceType())
                         .title(resultItem.getTitle() == null ? "-" : resultItem.getTitle())
+                        .keyword(resultItem.getKeyword() == null ? "-" : resultItem.getKeyword())
                         .link(resultItem.getLink() == null ? "-" : resultItem.getLink())
                         .thumbnail(resultItem.getThumbnail() == null ? "-" : resultItem.getThumbnail())
                         .summary(resultItem.getSummary() == null ? "-" : resultItem.getSummary())
