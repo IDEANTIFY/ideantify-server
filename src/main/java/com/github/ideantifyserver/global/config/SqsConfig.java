@@ -2,6 +2,7 @@ package com.github.ideantifyserver.global.config;
 
 import io.awspring.cloud.sqs.operations.SqsTemplate;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -10,6 +11,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 
 @Configuration
+@ConditionalOnProperty(name = "aws.sqs.enabled", havingValue = "true", matchIfMissing = false)
 public class SqsConfig {
 
     @Value("${spring.cloud.aws.region.static}")
@@ -25,12 +27,16 @@ public class SqsConfig {
     public SqsAsyncClient sqsAsyncClient() {
         return SqsAsyncClient.builder()
                 .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)
+                ))
                 .build();
     }
 
     @Bean
-    public SqsTemplate sqsTemplate(SqsAsyncClient client) {
-        return SqsTemplate.newTemplate(client);
+    public SqsTemplate sqsTemplate(SqsAsyncClient sqsAsyncClient) {
+        return SqsTemplate.builder()
+                .sqsAsyncClient(sqsAsyncClient)
+                .build();
     }
 }

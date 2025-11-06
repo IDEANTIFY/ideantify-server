@@ -1,9 +1,6 @@
 package com.github.ideantifyserver.global.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.ideantifyserver.domain.user.repository.UserRepository;
 import com.github.ideantifyserver.global.security.jwt.JwtFilter;
-import com.github.ideantifyserver.global.security.jwt.JwtUtil;
 import com.github.ideantifyserver.global.security.oauth.CustomOAuth2UserService;
 import com.github.ideantifyserver.global.security.oauth.OAuth2AuthenticationFailureHandler;
 import com.github.ideantifyserver.global.security.oauth.OAuth2AuthenticationSuccessHandler;
@@ -42,13 +39,23 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .authenticationProvider(authenticationProvider)
 
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api/login/**",
+                                "/api/oauth2/**",
+                                "/api/onboarding/**",
+                                "/login/**",
+                                "/oauth2/**",
+                                "/onboarding/**",
+                                "/error",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
+                        .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login")
-                        .redirectionEndpoint(redirection -> redirection
-                                .baseUri("/login/oauth2/code/*")
-                        )
                         .userInfoEndpoint(userInfo ->
                                 userInfo.userService(customOAuth2UserService))
                         .successHandler(oAuth2AuthenticationSuccessHandler)

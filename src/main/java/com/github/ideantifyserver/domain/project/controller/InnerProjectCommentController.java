@@ -27,8 +27,10 @@ public class InnerProjectCommentController {
 
     private final InnerProjectService innerProjectService;
 
+    // ==================== 댓글 관리 ====================
+
     @PostMapping("/{project}/comments")
-    @Operation(summary = "프로젝트 댓글 작성")
+    @Operation(summary = "댓글 작성")
     public ApiResponse<CreatedCommentResponseDto> addComment(
             @DomainParameter(description = "프로젝트 ID") @PathVariable InnerProject project,
             @RequestParam(required = false, name = "parent") UUID parentId,
@@ -39,7 +41,7 @@ public class InnerProjectCommentController {
     }
 
     @PutMapping("/{project}/comments/{comment}")
-    @Operation(summary = "프로젝트 댓글 수정")
+    @Operation(summary = "댓글 수정")
     public ApiResponse<CreatedCommentResponseDto> updateComment(
             @DomainParameter(description = "프로젝트 ID") @PathVariable InnerProject project,
             @DomainParameter(description = "댓글 ID") @PathVariable InnerProjectComment comment,
@@ -50,7 +52,7 @@ public class InnerProjectCommentController {
     }
 
     @DeleteMapping("/{project}/comments/{comment}")
-    @Operation(summary = "프로젝트 댓글 삭제")
+    @Operation(summary = "댓글 삭제")
     public ApiResponse<Void> deleteComment(
             @DomainParameter(description = "프로젝트 ID") @PathVariable InnerProject project,
             @DomainParameter(description = "댓글 ID") @PathVariable InnerProjectComment comment,

@@ -1,7 +1,6 @@
 package com.github.ideantifyserver.domain.chat.entity;
 
 import com.github.ideantifyserver.domain.ideareport.entity.IdeaReportResult;
-import com.github.ideantifyserver.domain.project.entity.InnerProject;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import jakarta.persistence.*;
@@ -16,6 +15,9 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatRoom extends BaseSchema {
+
+    @Column
+    String title;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -33,13 +35,9 @@ public class ChatRoom extends BaseSchema {
     @JoinColumn(name = "user_id")
     User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "inner_project_id")
-    InnerProject project;
-
     public enum ChatRoomType {
         USER,
-        IDEA_REPORT,
-        PROJECT
+        DEVELOP,
+        IDEA_REPORT
     }
 }

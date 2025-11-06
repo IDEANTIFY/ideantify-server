@@ -22,6 +22,8 @@ public class InnerProjectBookmarkController {
 
     private final InnerProjectService innerProjectService;
 
+    // ==================== 북마크 ====================
+
     @PostMapping("/{project}/bookmark")
     @Operation(summary = "북마크 추가")
     public ApiResponse<ProjectBookmarkResponseDto> bookmarkProject(

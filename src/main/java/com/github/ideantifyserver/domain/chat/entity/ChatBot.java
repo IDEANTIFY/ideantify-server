@@ -3,6 +3,7 @@ package com.github.ideantifyserver.domain.chat.entity;
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Entity
@@ -14,7 +15,7 @@ public class ChatBot extends BaseSchema {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    @NotBlank
+    @NotNull
     ChatBotRole role;
 
     @Column(nullable = false)
