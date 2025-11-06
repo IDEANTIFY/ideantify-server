@@ -14,7 +14,7 @@ public class IdeaReportSqsGateway {
 
     private final SqsTemplate sqsTemplate;
 
-    @Value("${app.sqs.idea-report.request-queue}")
+    @Value("${spring.cloud.aws.sqs.idea-report.request-queue}")
     private String requestQueue;
 
     private static final String HDR_MESSAGE_TYPE = "messageType";

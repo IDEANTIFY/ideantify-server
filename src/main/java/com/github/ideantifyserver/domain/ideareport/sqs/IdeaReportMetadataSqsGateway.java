@@ -16,7 +16,7 @@ import java.util.UUID;
 public class IdeaReportMetadataSqsGateway {
     private final SqsTemplate sqsTemplate;
 
-    @Value("${app.sqs.idea-report-metadata.request-queue}")
+    @Value("${spring.cloud.aws.sqs.idea-report-metadata.request-queue}")
     private String requestQueue;
 
     private static final String HDR_MESSAGE_TYPE = "messageType";

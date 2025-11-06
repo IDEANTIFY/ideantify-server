@@ -37,11 +37,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
-    implementation 'software.amazon.awssdk:s3'
-    implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:3.0.1')
-    implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
-    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:3.2.1')
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
     implementation 'org.springframework:spring-messaging'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -49,7 +47,4 @@ dependencies {
 
     implementation 'io.lettuce:lettuce-core'
     implementation 'com.auth0:java-jwt:4.4.0'
-
-    // AWS SQS
-    implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs:3.2.1'
 }
