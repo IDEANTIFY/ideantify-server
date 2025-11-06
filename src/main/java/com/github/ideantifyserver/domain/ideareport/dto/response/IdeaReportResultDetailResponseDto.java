@@ -33,6 +33,7 @@ public class IdeaReportResultDetailResponseDto {
         UUID id;
         String sourceType;
         String title;
+        String keyword;
         String link;
         String thumbnail;
         String summary;

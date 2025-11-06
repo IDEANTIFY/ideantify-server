@@ -60,6 +60,7 @@ public class AiIdeaReportResultMessage {
     public static class ResultItem {
         String sourceType;
         String title;
+        String keyword;
         String link;
         String thumbnail;
         String summary;

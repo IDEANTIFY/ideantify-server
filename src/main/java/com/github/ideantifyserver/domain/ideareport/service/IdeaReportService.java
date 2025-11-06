@@ -112,6 +112,7 @@ public class IdeaReportService {
                                 .id(item.getId())
                                 .sourceType(item.getSourceType())
                                 .title(item.getTitle())
+                                .keyword(item.getKeyword())
                                 .link(item.getLink())
                                 .thumbnail(item.getThumbnail())
                                 .summary(item.getSummary())
