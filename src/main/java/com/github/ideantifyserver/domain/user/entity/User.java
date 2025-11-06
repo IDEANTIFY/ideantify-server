@@ -57,4 +57,12 @@ public class User extends BaseSchema implements UserContext {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     List<UserDomain> keywords = new ArrayList<>();
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void updateAvatar(String avatar) {
+        this.avatar = avatar;
+    }
 }
