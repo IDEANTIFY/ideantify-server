@@ -39,6 +39,30 @@ public class UserService {
     }
 
     @Transactional
+    public UserResponse updateMyProfile(User user, UpdateProfileRequest request) {
+
+        if (request.getNickname() != null && !request.getNickname().equals(user.getNickname())) {
+            if (userRepository.findByNickname(request.getNickname()).isPresent()) {
+                throw UserExceptions.ALREADY_EXIST.toException();
+            }
+            user.updateNickname(request.getNickname());
+        }
+
+        if (request.getAvatar() != null) {
+            user.updateAvatar(request.getAvatar());
+        }
+
+        if (user.getSocial() != null && request.getProfile() != null) {
+
+            user.getSocial().updateSocialLinks(
+                    request.getProfile().getGithub(),
+                    request.getProfile().getLinkedin(),
+                    request.getProfile().getInstagram()
+            );
+        }
+
+        return UserResponse.from(userRepository.save(user));
+  
     @PreAuthorize("#me != #user")
     public void followUser(User me, User user) {
 
