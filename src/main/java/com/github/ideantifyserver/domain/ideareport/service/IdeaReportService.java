@@ -66,7 +66,7 @@ public class IdeaReportService {
                 .build();
         inputRepository.save(input);
 
-        metadataGateway.publish(input.getId(), req, ideaReportMetadataResponseQueue);
+        metadataGateway.publish(input.getId(), req, ideaReportResponseQueue);
         return input.getId();
     }
 
