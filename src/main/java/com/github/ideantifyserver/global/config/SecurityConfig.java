@@ -1,9 +1,6 @@
 package com.github.ideantifyserver.global.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.ideantifyserver.domain.user.repository.UserRepository;
 import com.github.ideantifyserver.global.security.jwt.JwtFilter;
-import com.github.ideantifyserver.global.security.jwt.JwtUtil;
 import com.github.ideantifyserver.global.security.oauth.CustomOAuth2UserService;
 import com.github.ideantifyserver.global.security.oauth.OAuth2AuthenticationFailureHandler;
 import com.github.ideantifyserver.global.security.oauth.OAuth2AuthenticationSuccessHandler;

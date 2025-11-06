@@ -32,6 +32,8 @@ public class InnerProjectController {
 
     private final InnerProjectService innerProjectService;
 
+    // ==================== 프로젝트 생성 ====================
+
     @PostMapping
     @Operation(summary = "프로젝트 등록")
     public ApiResponse<ProjectResponseDto> createProject(
@@ -40,6 +42,8 @@ public class InnerProjectController {
     ) {
         return ApiResponse.ok(innerProjectService.create(req, user));
     }
+
+    // ==================== 프로젝트 조회 ====================
 
     @GetMapping("/list")
     @Operation(summary = "전체 프로젝트 목록 조회")
@@ -55,12 +59,14 @@ public class InnerProjectController {
     }
 
     @GetMapping("/{project}")
-    @Operation(summary = "프로젝트 조회")
+    @Operation(summary = "프로젝트 상세 조회")
     public ApiResponse<ProjectDetailResponseDto> getProject(
             @DomainParameter(description = "프로젝트 ID") @PathVariable InnerProject project
     ) {
         return ApiResponse.ok(innerProjectService.getProject(project));
     }
+
+    // ==================== 프로젝트 수정 ====================
 
     @PutMapping("/{project}")
     @Operation(summary = "프로젝트 수정")
@@ -71,6 +77,8 @@ public class InnerProjectController {
     ) {
         return ApiResponse.ok(innerProjectService.update(project, req, user));
     }
+
+    // ==================== 프로젝트 삭제 ====================
 
     @DeleteMapping("/{project}")
     @Operation(summary = "프로젝트 삭제")

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.ideantifyserver.domain.chat.dto.AiChatRequestMessage;
 import com.github.ideantifyserver.domain.chat.dto.AiChatResponseMessage;
+import com.github.ideantifyserver.domain.chat.entity.ChatRoom;
 import com.github.ideantifyserver.domain.chat.exception.ChatExceptionCode;
 import com.github.ideantifyserver.global.property.SqsProperty;
 import io.awspring.cloud.sqs.annotation.SqsListener;
@@ -22,11 +23,19 @@ public class SqsService {
     private final ObjectMapper objectMapper;
     private final AiResponseProcessor aiResponseProcessor;
 
-    public void sendAiChatRequest(AiChatRequestMessage message) {
+    public void sendAiChatRequest(AiChatRequestMessage message, ChatRoom.ChatRoomType type) {
         try {
             String messageBody = objectMapper.writeValueAsString(message);
+
+            // 타입별로 다른 queue로 전송
+            String queueUrl = switch (type) {
+                case USER -> sqsProperty.getUserChatRequest();
+                case DEVELOP -> sqsProperty.getDevelopChatRequest();
+                case IDEA_REPORT -> sqsProperty.getIdeaReportChatRequest();
+            };
+
             sqsTemplate.send(to -> to
-                    .queue(sqsProperty.getAiRequest())
+                    .queue(queueUrl)
                     .payload(messageBody)
             );
         } catch (JsonProcessingException e) {
@@ -36,8 +45,32 @@ public class SqsService {
         }
     }
 
-    @SqsListener("${spring.cloud.aws.sqs.queue.ai-response}")
-    public void receiveAiChatResponse(String messageBody) {
+    @SqsListener("${spring.cloud.aws.sqs.queue.user-chat-response}")
+    public void receiveUserChatResponse(String messageBody) {
+        try {
+            AiChatResponseMessage response = objectMapper.readValue(messageBody, AiChatResponseMessage.class);
+            aiResponseProcessor.processAiResponse(response);
+        } catch (JsonProcessingException e) {
+            throw ChatExceptionCode.SQS_MESSAGE_PARSE_FAILED.toException();
+        } catch (Exception e) {
+            throw ChatExceptionCode.SQS_MESSAGE_PARSE_FAILED.toException();
+        }
+    }
+
+    @SqsListener("${spring.cloud.aws.sqs.queue.develop-chat-response}")
+    public void receiveDevelopChatResponse(String messageBody) {
+        try {
+            AiChatResponseMessage response = objectMapper.readValue(messageBody, AiChatResponseMessage.class);
+            aiResponseProcessor.processAiResponse(response);
+        } catch (JsonProcessingException e) {
+            throw ChatExceptionCode.SQS_MESSAGE_PARSE_FAILED.toException();
+        } catch (Exception e) {
+            throw ChatExceptionCode.SQS_MESSAGE_PARSE_FAILED.toException();
+        }
+    }
+
+    @SqsListener("${spring.cloud.aws.sqs.queue.idea-report-chat-response}")
+    public void receiveIdeaReportChatResponse(String messageBody) {
         try {
             AiChatResponseMessage response = objectMapper.readValue(messageBody, AiChatResponseMessage.class);
             aiResponseProcessor.processAiResponse(response);

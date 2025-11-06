@@ -14,8 +14,8 @@ import java.util.UUID;
 public class AiChatRequestMessage {
     private UUID chatRoomId;
     private UUID userId;
+    private UUID ideaReportId;
     private String content;
-    private String context;  // IdeaReport의 배경 정보
     private RequestType type;
 
     public enum RequestType {
