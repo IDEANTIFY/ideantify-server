@@ -1,14 +1,19 @@
 package com.github.ideantifyserver.domain.user.service;
 
 import com.github.ideantifyserver.domain.auth.exception.AuthExceptions;
+import com.github.ideantifyserver.domain.user.dto.request.UpdateProfileRequest;
 import com.github.ideantifyserver.domain.user.dto.response.SimpleUserResponse;
 import com.github.ideantifyserver.domain.user.dto.response.TrendingIssueResponse;
 import com.github.ideantifyserver.domain.user.dto.response.UserResponse;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.exception.UserExceptions;
+import com.github.ideantifyserver.domain.user.entity.UserFollow;
+import com.github.ideantifyserver.domain.user.repository.UserFollowRepository;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
+import com.github.ideantifyserver.global.exception.GlobalExceptions;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Limit;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +24,7 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserFollowRepository userFollowRepository;
 
     @Transactional(readOnly = true)
     public UserResponse getMyProfile(User user) {
@@ -49,5 +55,68 @@ public class UserService {
 
         // TODO: 실제 AI API 호출로 교체
         return List.of();
+      
+    @Transactional
+    public UserResponse updateMyProfile(User user, UpdateProfileRequest request) {
+
+        if (request.getNickname() != null && !request.getNickname().equals(user.getNickname())) {
+            if (userRepository.findByNickname(request.getNickname()).isPresent()) {
+                throw UserExceptions.ALREADY_EXIST.toException();
+            }
+            user.updateNickname(request.getNickname());
+        }
+
+        if (request.getAvatar() != null) {
+            user.updateAvatar(request.getAvatar());
+        }
+
+        if (user.getSocial() != null && request.getProfile() != null) {
+
+            user.getSocial().updateSocialLinks(
+                    request.getProfile().getGithub(),
+                    request.getProfile().getLinkedin(),
+                    request.getProfile().getInstagram()
+            );
+        }
+
+        return UserResponse.from(userRepository.save(user));
+  
+    @PreAuthorize("#me != #user")
+    public void followUser(User me, User user) {
+
+        if (userFollowRepository.existsByFollowerAndFollowing(me, user)) {
+            throw GlobalExceptions.NOT_PERMITTED.toException();
+        }
+
+        userFollowRepository.save(UserFollow.builder().follower(me).following(user).build());
+    }
+
+    @Transactional
+    public void unfollowUser(User me, User user) {
+
+        UserFollow userFollow = userFollowRepository.findByFollowerAndFollowing(me, user)
+                .orElseThrow(GlobalExceptions.NOT_PERMITTED::toException);
+
+        userFollowRepository.delete(userFollow);
+    }
+
+    public List<SimpleUserResponse> getFollowers(User me) {
+
+        List<UserFollow> follows = userFollowRepository.findByFollowing(me);
+
+        return follows.stream()
+                .map(UserFollow::getFollower)
+                .map(SimpleUserResponse::from)
+                .toList();
+    }
+
+    public List<SimpleUserResponse> getFollowings(User me) {
+
+        List<UserFollow> followings = userFollowRepository.findByFollower(me);
+
+        return followings.stream()
+                .map(UserFollow::getFollowing)
+                .map(SimpleUserResponse::from)
+                .toList();
     }
 }

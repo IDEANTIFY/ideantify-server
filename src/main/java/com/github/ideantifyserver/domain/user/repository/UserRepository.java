@@ -17,4 +17,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     @Query("SELECT distinct u FROM User u WHERE :query IS NULL or u.nickname LIKE CONCAT('%', :query, '%') or u.email LIKE CONCAT('%', :query, '%')")
     List<User> findByNicknameOrEmail(String query, Limit limit);
+
+    Optional<User> findByNickname(String nickname);
 }
