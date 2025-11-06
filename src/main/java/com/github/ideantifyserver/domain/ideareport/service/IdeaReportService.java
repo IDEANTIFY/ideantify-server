@@ -11,8 +11,6 @@ import com.github.ideantifyserver.domain.ideareport.repository.IdeaReportResultR
 import com.github.ideantifyserver.domain.ideareport.repository.IdeaReportTaskRepository;
 import com.github.ideantifyserver.domain.ideareport.sqs.IdeaReportSqsGateway;
 import com.github.ideantifyserver.domain.ideareport.sqs.IdeaReportMetadataSqsGateway;
-import com.github.ideantifyserver.domain.keyword.entity.Keyword;
-import com.github.ideantifyserver.domain.keyword.repository.KeywordRepository;
 import com.github.ideantifyserver.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +29,6 @@ public class IdeaReportService {
     private final IdeaReportTaskRepository taskRepository;
 
     private final IdeaReportInputRepository inputRepository;
-    private final KeywordRepository keywordRepository;
     private final IdeaReportSqsGateway metadataGateway;
 
     private final IdeaReportResultRepository resultRepository;
@@ -68,11 +65,6 @@ public class IdeaReportService {
                 .user(user)
                 .build();
         inputRepository.save(input);
-
-        if (req.getKeywords() != null && !req.getKeywords().isEmpty()) {
-            var keywords = keywordRepository.findAllById(req.getKeywords());
-            for (Keyword k : keywords) input.addKeyword(k);
-        }
 
         metadataGateway.publish(input.getId(), req, ideaReportMetadataResponseQueue);
         return input.getId();

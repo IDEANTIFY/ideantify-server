@@ -1,14 +1,10 @@
 package com.github.ideantifyserver.domain.ideareport.entity;
 
-import com.github.ideantifyserver.domain.keyword.entity.Keyword;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -47,18 +43,6 @@ public class IdeaReportInput extends BaseSchema {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     User user;
-
-    @OneToMany(mappedBy = "input", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    List<IdeaReportInputKeyword> inputKeywords = new ArrayList<>();
-
-    public void addKeyword(Keyword k) {
-        IdeaReportInputKeyword link = IdeaReportInputKeyword.builder()
-                .input(this)
-                .keyword(k)
-                .build();
-        this.inputKeywords.add(link);
-    }
 
     public void setResult(IdeaReportResult result) {
         this.result = result;
