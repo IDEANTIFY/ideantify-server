@@ -33,7 +33,7 @@ public class IdeaReportResponseListener {
     private static final String TYPE_RESULT = "IDEA_REPORT_RESULT";
 
     @Transactional
-    @SqsListener("${app.sqs.idea-report.response-queue}")
+    @SqsListener("${spring.cloud.aws.sqs.idea-report.response-queue}")
     public void onResponse(Message<String> message) {
         String type = String.valueOf(message.getHeaders().get(HDR_TYPE));
         if (!TYPE_RESULT.equals(type)) return;

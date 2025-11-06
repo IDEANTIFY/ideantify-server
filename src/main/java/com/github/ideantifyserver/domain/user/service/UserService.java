@@ -55,7 +55,8 @@ public class UserService {
 
         // TODO: 실제 AI API 호출로 교체
         return List.of();
-      
+    }
+
     @Transactional
     @PreAuthorize("#me != #user")
     public void followUser(User me, User user) {

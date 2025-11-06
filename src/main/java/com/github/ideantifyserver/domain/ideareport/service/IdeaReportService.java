@@ -33,10 +33,10 @@ public class IdeaReportService {
 
     private final IdeaReportResultRepository resultRepository;
 
-    @Value("${app.sqs.idea-report.response-queue}")
+    @Value("${spring.cloud.aws.sqs.idea-report.response-queue}")
     private String ideaReportResponseQueue;
 
-    @Value("${app.sqs.idea-report-metadata.response-queue}")
+    @Value("${spring.cloud.aws.sqs.idea-report-metadata.response-queue}")
     private String ideaReportMetadataResponseQueue;
 
     @Transactional

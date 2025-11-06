@@ -28,7 +28,6 @@ public class UserController {
 
     private final UserService userService;
 
-    // ==================== 사용자 정보 조회 ====================
 
     @GetMapping("/me")
     @Operation(summary = "내 정보 조회")
@@ -48,7 +47,6 @@ public class UserController {
         return ApiResponse.ok(userService.getMyProfile(user));
     }
 
-    // ==================== 사용자 검색 ====================
 
     @GetMapping
     @Operation(summary = "사용자 검색")
@@ -64,8 +62,8 @@ public class UserController {
     public ApiResponse<List<TrendingIssueResponse>> getTrendingIssues(
             @CurrentUser User user
     ) {
-
         return ApiResponse.ok(userService.getTrendingIssues(user));
+    }
 
     @PutMapping("/me")
     @Operation(summary = "내 정보 수정")
@@ -73,6 +71,6 @@ public class UserController {
             @CurrentUser User user,
             @RequestBody @Valid UpdateProfileRequest request
     ) {
-
         return ApiResponse.ok(userService.updateMyProfile(user, request));
+    }
 }

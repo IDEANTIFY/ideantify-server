@@ -50,15 +50,6 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
-  cloud:
-    aws:
-      region:
-        static: ap-northeast-2
-      s3:
-        bucket: ${AWS_S3_BUCKET_NAME}
-      credentials:
-        access-key: ${AWS_ACCESS_KEY}
-        secret-key: ${AWS_SECRET_KEY}
 
 app:
   jwt:
@@ -68,8 +59,6 @@ app:
       callback:
         google: ${GOOGLE_CALLBACK_URL:http://localhost:3000/auth/callback}
         kakao: ${KAKAO_CALLBACK_URL:http://localhost:3000/auth/callback}
-        google: ${GOOGLE_CALLBACK_URL}
-        kakao: ${KAKAO_CALLBACK_URL}
 
 #logging:
 #  level:
@@ -84,6 +73,8 @@ spring.cloud:
     credentials:
       access-key: ${AWS_ACCESS_KEY_ID}
       secret-key: ${AWS_SECRET_ACCESS_KEY}
+    s3:
+      bucket: ${AWS_S3_BUCKET_NAME:dummy-bucket}
     sqs:
       enabled: ${AWS_SQS_ENABLED:true}
       chat:

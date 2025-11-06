@@ -25,7 +25,7 @@ public class IdeaReportMetadataResponseListener {
     private static final String HDR_MESSAGE_TYPE = "messageType";
     private static final String MESSAGE_TYPE     = "IDEA_REPORT";
 
-    @SqsListener("${app.sqs.idea-report-metadata.response-queue}")
+    @SqsListener("${spring.cloud.aws.sqs.idea-report-metadata.response-queue}")
     public void onResponse(Message<CreateIdeaReportMetadataResponseDto> message) {
         MessageHeaders headers = message.getHeaders();
         String type = String.valueOf(headers.get(HDR_MESSAGE_TYPE));
