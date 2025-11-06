@@ -5,8 +5,8 @@ import com.github.ideantifyserver.domain.user.dto.request.UpdateProfileRequest;
 import com.github.ideantifyserver.domain.user.dto.response.SimpleUserResponse;
 import com.github.ideantifyserver.domain.user.dto.response.UserResponse;
 import com.github.ideantifyserver.domain.user.entity.User;
-import com.github.ideantifyserver.domain.user.exception.UserExceptions;
 import com.github.ideantifyserver.domain.user.entity.UserFollow;
+import com.github.ideantifyserver.domain.user.exception.UserExceptions;
 import com.github.ideantifyserver.domain.user.repository.UserFollowRepository;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
 import com.github.ideantifyserver.global.exception.GlobalExceptions;
@@ -74,6 +74,7 @@ public class UserService {
     }
 
     @Transactional
+    @PreAuthorize("#me != #user")
     public void unfollowUser(User me, User user) {
 
         UserFollow userFollow = userFollowRepository.findByFollowerAndFollowing(me, user)
@@ -82,6 +83,7 @@ public class UserService {
         userFollowRepository.delete(userFollow);
     }
 
+    @Transactional
     public List<SimpleUserResponse> getFollowers(User me) {
 
         List<UserFollow> follows = userFollowRepository.findByFollowing(me);
@@ -92,6 +94,7 @@ public class UserService {
                 .toList();
     }
 
+    @Transactional
     public List<SimpleUserResponse> getFollowings(User me) {
 
         List<UserFollow> followings = userFollowRepository.findByFollower(me);
@@ -100,5 +103,31 @@ public class UserService {
                 .map(UserFollow::getFollowing)
                 .map(SimpleUserResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public UserResponse updateMyProfile(User user, UpdateProfileRequest request) {
+
+        if (request.getNickname() != null && !request.getNickname().equals(user.getNickname())) {
+            if (userRepository.findByNickname(request.getNickname()).isPresent()) {
+                throw UserExceptions.ALREADY_EXIST.toException();
+            }
+            user.updateNickname(request.getNickname());
+        }
+
+        if (request.getAvatar() != null) {
+            user.updateAvatar(request.getAvatar());
+        }
+
+        if (user.getSocial() != null && request.getProfile() != null) {
+
+            user.getSocial().updateSocialLinks(
+                    request.getProfile().getGithub(),
+                    request.getProfile().getLinkedin(),
+                    request.getProfile().getInstagram()
+            );
+        }
+
+        return UserResponse.from(userRepository.save(user));
     }
 }
