@@ -2,6 +2,7 @@ package com.github.ideantifyserver.domain.user.controller;
 
 import com.github.ideantifyserver.domain.user.dto.request.UpdateProfileRequest;
 import com.github.ideantifyserver.domain.user.dto.response.SimpleUserResponse;
+import com.github.ideantifyserver.domain.user.dto.response.TrendingIssueResponse;
 import com.github.ideantifyserver.domain.user.dto.response.UserResponse;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.service.UserService;
@@ -54,6 +55,14 @@ public class UserController {
         return ApiResponse.ok(userService.searchUsers(query));
     }
 
+    @GetMapping("/issues")
+    @Operation(summary = "요즘 뜨는 이슈 목록 조회")
+    public ApiResponse<List<TrendingIssueResponse>> getTrendingIssues(
+            @CurrentUser User user
+    ) {
+
+        return ApiResponse.ok(userService.getTrendingIssues(user));
+
     @PutMapping("/me")
     @Operation(summary = "내 정보 수정")
     public ApiResponse<UserResponse> updateMyProfile(
@@ -62,5 +71,4 @@ public class UserController {
     ) {
 
         return ApiResponse.ok(userService.updateMyProfile(user, request));
-    }
 }
