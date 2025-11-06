@@ -2,8 +2,10 @@ package com.github.ideantifyserver.domain.user.service;
 
 import com.github.ideantifyserver.domain.auth.exception.AuthExceptions;
 import com.github.ideantifyserver.domain.user.dto.response.SimpleUserResponse;
+import com.github.ideantifyserver.domain.user.dto.response.TrendingIssueResponse;
 import com.github.ideantifyserver.domain.user.dto.response.UserResponse;
 import com.github.ideantifyserver.domain.user.entity.User;
+import com.github.ideantifyserver.domain.user.exception.UserExceptions;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Limit;
@@ -29,5 +31,23 @@ public class UserService {
 
         List<User> users = userRepository.findByNicknameOrEmail(query, Limit.of(5));
         return users.stream().map(SimpleUserResponse::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<TrendingIssueResponse> getTrendingIssues(User user) {
+
+        User userWithKeywords = userRepository.findById(user.getId())
+                .orElseThrow(AuthExceptions.USER_NOT_FOUND::toException);
+
+        List<String> keywords = userWithKeywords.getKeywords().stream()
+                .map(userDomain -> userDomain.getKeyword().getName())
+                .toList();
+
+        if (keywords.isEmpty()) {
+            throw UserExceptions.NO_KEYWORDS_FOUND.toException();
+        }
+
+        // TODO: 실제 AI API 호출로 교체
+        return List.of();
     }
 }
