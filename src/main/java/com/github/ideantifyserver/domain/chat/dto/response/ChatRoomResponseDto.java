@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
+import static com.github.ideantifyserver.domain.chat.entity.ChatRoom.*;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -15,7 +17,7 @@ import java.util.UUID;
 public class ChatRoomResponseDto {
     private UUID chatRoomId;
     private String title;
-    private ChatRoom.ChatRoomType type;
+    private ChatRoomType type;
     private UUID ideaReportId;  // IDEA_REPORT 타입인 경우만 존재
     private String createdAt;
 

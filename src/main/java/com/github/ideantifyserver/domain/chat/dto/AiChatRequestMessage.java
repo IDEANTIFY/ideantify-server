@@ -15,11 +15,6 @@ public class AiChatRequestMessage {
     private UUID chatRoomId;
     private UUID userId;
     private UUID ideaReportId;
+    private IdeaReportData ideaReportData;
     private String content;
-    private RequestType type;
-
-    public enum RequestType {
-        CREATE_ROOM,
-        SEND_MESSAGE
-    }
 }

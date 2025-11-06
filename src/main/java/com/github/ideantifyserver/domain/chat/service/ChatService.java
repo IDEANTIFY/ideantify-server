@@ -1,6 +1,7 @@
 package com.github.ideantifyserver.domain.chat.service;
 
 import com.github.ideantifyserver.domain.chat.dto.AiChatRequestMessage;
+import com.github.ideantifyserver.domain.chat.dto.IdeaReportData;
 import com.github.ideantifyserver.domain.chat.dto.response.*;
 import com.github.ideantifyserver.domain.chat.entity.ChatBot;
 import com.github.ideantifyserver.domain.chat.entity.ChatRoom;
@@ -13,6 +14,7 @@ import com.github.ideantifyserver.domain.user.entity.User;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,10 +31,9 @@ public class ChatService {
     @Autowired(required = false)
     private SqsService sqsService;
 
-    //일반 채팅방 생성 (USER 타입)
+    //일반 채팅방 생성
     @Transactional
     public CreateChatRoomResponseDto createChatRoom(User user, String content) {
-        // 임시 채팅방 생성 (title은 AI 응답 대기)
         ChatRoom chatRoom = ChatRoom.builder()
                 .type(ChatRoom.ChatRoomType.USER)
                 .user(user)
@@ -48,15 +49,86 @@ public class ChatService {
                 .build();
         chatBotRepository.save(userBot);
 
-        // SQS로 AI에게 요청 전송
+        // SQS로 AI에게 요청
         if (sqsService != null) {
             AiChatRequestMessage aiRequest = AiChatRequestMessage.builder()
                     .chatRoomId(chatRoom.getId())
                     .userId(user.getId())
                     .content(content)
-                    .type(AiChatRequestMessage.RequestType.CREATE_ROOM)
                     .build();
             sqsService.sendAiChatRequest(aiRequest, ChatRoom.ChatRoomType.USER);
+        }
+
+        return CreateChatRoomResponseDto.of(
+                chatRoom.getId(),
+                chatRoom.getTitle());
+    }
+
+    // IdeaReport 채팅방 생성
+    @Transactional
+    public CreateChatRoomResponseDto createIdeaReportChatRoom(User user, UUID ideaReportId, String content) {
+        IdeaReportResult ideaReport = ideaReportResultRepository.findById(ideaReportId)
+                .orElseThrow(ChatExceptionCode.CHAT_ROOM_NOT_FOUND::toException);
+
+        ChatRoom chatRoom = ChatRoom.builder()
+                .type(ChatRoom.ChatRoomType.IDEA_REPORT)
+                .user(user)
+                .ideaReport(ideaReport)
+                .title("아이디어 리포트 분석 중...")
+                .build();
+        chatRoomRepository.save(chatRoom);
+
+        // 사용자 메시지 저장
+        ChatBot userBot = ChatBot.builder()
+                .room(chatRoom)
+                .role(ChatBot.ChatBotRole.USER)
+                .content(content)
+                .build();
+        chatBotRepository.save(userBot);
+
+        // SQS로 AI에게 요청
+        if (sqsService != null) {
+            AiChatRequestMessage aiRequest = AiChatRequestMessage.builder()
+                    .chatRoomId(chatRoom.getId())
+                    .userId(user.getId())
+                    .ideaReportId(ideaReportId)
+                    .ideaReportData(IdeaReportData.from(ideaReport))
+                    .content(content)
+                    .build();
+            sqsService.sendAiChatRequest(aiRequest, ChatRoom.ChatRoomType.IDEA_REPORT);
+        }
+
+        return CreateChatRoomResponseDto.of(
+                chatRoom.getId(),
+                chatRoom.getTitle());
+    }
+
+    // Develop 채팅방 생성
+    @Transactional
+    public CreateChatRoomResponseDto createDevelopChatRoom(User user, String content) {
+        ChatRoom chatRoom = ChatRoom.builder()
+                .type(ChatRoom.ChatRoomType.DEVELOP)
+                .user(user)
+                .title("아이디어 디벨롭 중...")
+                .build();
+        chatRoomRepository.save(chatRoom);
+
+        // 사용자 메시지 저장
+        ChatBot userBot = ChatBot.builder()
+                .room(chatRoom)
+                .role(ChatBot.ChatBotRole.USER)
+                .content(content)
+                .build();
+        chatBotRepository.save(userBot);
+
+        // SQS로 AI에게 요청
+        if (sqsService != null) {
+            AiChatRequestMessage aiRequest = AiChatRequestMessage.builder()
+                    .chatRoomId(chatRoom.getId())
+                    .userId(user.getId())
+                    .content(content)
+                    .build();
+            sqsService.sendAiChatRequest(aiRequest, ChatRoom.ChatRoomType.DEVELOP);
         }
 
         return CreateChatRoomResponseDto.of(
@@ -98,12 +170,12 @@ public class ChatService {
             AiChatRequestMessage.AiChatRequestMessageBuilder builder = AiChatRequestMessage.builder()
                     .chatRoomId(chatRoomId)
                     .userId(user.getId())
-                    .content(content)
-                    .type(AiChatRequestMessage.RequestType.SEND_MESSAGE);
+                    .content(content);
 
-            // IDEA_REPORT 타입인 경우 ideaReportId 포함
+            // IDEA_REPORT 타입인 경우 ideaReportId와 전체 데이터 포함
             if (chatRoom.getType() == ChatRoom.ChatRoomType.IDEA_REPORT && chatRoom.getIdeaReport() != null) {
                 builder.ideaReportId(chatRoom.getIdeaReport().getId());
+                builder.ideaReportData(IdeaReportData.from(chatRoom.getIdeaReport()));
             }
 
             sqsService.sendAiChatRequest(builder.build(), chatRoom.getType());
@@ -129,88 +201,12 @@ public class ChatService {
 
         // 메시지 조회
         List<ChatMessageDto> messages = chatBotRepository
-                .findByRoomIdOrderByCreatedAtAsc(chatRoomId, org.springframework.data.domain.PageRequest.of(page, size))
+                .findByRoomIdOrderByCreatedAtAsc(chatRoomId, PageRequest.of(page, size))
                 .stream()
                 .map(ChatMessageDto::from)
                 .toList();
 
         return ChatMessageListResponseDto.of(chatRoomMeta, messages);
-    }
-
-    // IdeaReport 채팅방 생성
-    @Transactional
-    public CreateChatRoomResponseDto createIdeaReportChatRoom(User user, UUID ideaReportId, String content) {
-        // IdeaReport 조회
-        IdeaReportResult ideaReport = ideaReportResultRepository.findById(ideaReportId)
-                .orElseThrow(ChatExceptionCode.CHAT_ROOM_NOT_FOUND::toException);
-
-        // 채팅방 생성
-        ChatRoom chatRoom = ChatRoom.builder()
-                .type(ChatRoom.ChatRoomType.IDEA_REPORT)
-                .user(user)
-                .ideaReport(ideaReport)
-                .title("아이디어 리포트 분석 중...")
-                .build();
-        chatRoomRepository.save(chatRoom);
-
-        // 사용자 메시지 저장
-        ChatBot userBot = ChatBot.builder()
-                .room(chatRoom)
-                .role(ChatBot.ChatBotRole.USER)
-                .content(content)
-                .build();
-        chatBotRepository.save(userBot);
-
-        // SQS로 AI에게 요청 전송 (ideaReportId 포함)
-        if (sqsService != null) {
-            AiChatRequestMessage aiRequest = AiChatRequestMessage.builder()
-                    .chatRoomId(chatRoom.getId())
-                    .userId(user.getId())
-                    .ideaReportId(ideaReportId)
-                    .content(content)
-                    .type(AiChatRequestMessage.RequestType.CREATE_ROOM)
-                    .build();
-            sqsService.sendAiChatRequest(aiRequest, ChatRoom.ChatRoomType.IDEA_REPORT);
-        }
-
-        return CreateChatRoomResponseDto.of(
-                chatRoom.getId(),
-                chatRoom.getTitle());
-    }
-
-    // Develop 채팅방 생성
-    @Transactional
-    public CreateChatRoomResponseDto createDevelopChatRoom(User user, String content) {
-        // 채팅방 생성
-        ChatRoom chatRoom = ChatRoom.builder()
-                .type(ChatRoom.ChatRoomType.DEVELOP)
-                .user(user)
-                .title("아이디어 디벨롭 중...")
-                .build();
-        chatRoomRepository.save(chatRoom);
-
-        // 사용자 메시지 저장
-        ChatBot userBot = ChatBot.builder()
-                .room(chatRoom)
-                .role(ChatBot.ChatBotRole.USER)
-                .content(content)
-                .build();
-        chatBotRepository.save(userBot);
-
-        // SQS로 AI에게 요청 전송
-        if (sqsService != null) {
-            AiChatRequestMessage aiRequest = AiChatRequestMessage.builder()
-                    .chatRoomId(chatRoom.getId())
-                    .userId(user.getId())
-                    .content(content)
-                    .type(AiChatRequestMessage.RequestType.CREATE_ROOM)
-                    .build();
-            sqsService.sendAiChatRequest(aiRequest, ChatRoom.ChatRoomType.DEVELOP);
-        }
-
-        return CreateChatRoomResponseDto.of(
-                chatRoom.getId(),
-                chatRoom.getTitle());
     }
 
 }

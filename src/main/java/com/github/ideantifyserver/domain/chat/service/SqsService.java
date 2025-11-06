@@ -90,14 +90,11 @@ public class SqsService {
     @SqsListener("${spring.cloud.aws.sqs.queue.idea-report-chat-response}")
     public void receiveIdeaReportChatResponse(Message<String> message) {
         try {
-            // 헤더에서 chatRoomId 추출
             String headerChatRoomId = (String) message.getHeaders().get("chatRoomId");
 
-            // Payload 파싱
             String messageBody = message.getPayload();
             AiChatResponseMessage response = objectMapper.readValue(messageBody, AiChatResponseMessage.class);
 
-            // 헤더와 payload의 chatRoomId 일치 검증
             if (headerChatRoomId != null && !headerChatRoomId.equals(response.getChatRoomId().toString())) {
                 throw ChatExceptionCode.CHAT_ROOM_ID_MISMATCH.toException();
             }
