@@ -23,7 +23,7 @@ public class ChatController {
     private final ChatService chatService;
 
     @PostMapping("/api/users/rooms")
-    @Operation(summary = "일반 채팅방 생성 (USER)")
+    @Operation(summary = "일반 채팅방 생성")
     public ApiResponse<CreateChatRoomResponseDto> createChatRoom(
             @CurrentUser(required = false) User user,
             @RequestBody @Valid CreateChatRoomRequestDto request
@@ -32,7 +32,7 @@ public class ChatController {
     }
 
     @PostMapping("/api/develop/rooms")
-    @Operation(summary = "아이디어 디벨롭 채팅방 생성 (DEVELOP)")
+    @Operation(summary = "아이디어 디벨롭 채팅방 생성")
     public ApiResponse<CreateChatRoomResponseDto> createDevelopChatRoom(
             @CurrentUser(required = false) User user,
             @RequestBody @Valid CreateChatRoomRequestDto request
@@ -41,7 +41,7 @@ public class ChatController {
     }
 
     @PostMapping("/api/idea-reports/{ideaReportId}/rooms")
-    @Operation(summary = "아이디어 리포트 채팅방 생성 (IDEA_REPORT)")
+    @Operation(summary = "아이디어 리포트 채팅방 생성")
     public ApiResponse<CreateChatRoomResponseDto> createIdeaReportChatRoom(
             @CurrentUser User user,
             @PathVariable("ideaReportId") UUID ideaReportId,

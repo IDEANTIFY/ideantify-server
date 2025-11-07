@@ -60,6 +60,10 @@ app:
         google: ${GOOGLE_CALLBACK_URL:http://localhost:3000/auth/callback}
         kakao: ${KAKAO_CALLBACK_URL:http://localhost:3000/auth/callback}
 
+ai:
+  api:
+    url: ${AI_API_URL:http://localhost:8000/api/user}
+
 #logging:
 #  level:
 #    org.springframework.security: TRACE
