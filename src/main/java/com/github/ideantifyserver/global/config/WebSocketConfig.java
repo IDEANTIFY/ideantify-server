@@ -13,13 +13,15 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws/chat")
-                .setAllowedOriginPatterns("*")
+                .setAllowedOrigins(
+                        "http://localhost:3000",
+                        "https://ideantify.wink.io.kr"
+                )
                 .withSockJS();
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.setApplicationDestinationPrefixes("/app");
         registry.enableSimpleBroker("/topic", "/queue");
     }
 }
