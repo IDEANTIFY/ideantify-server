@@ -2,6 +2,7 @@ package com.github.ideantifyserver.domain.user.controller;
 
 import com.github.ideantifyserver.domain.user.dto.request.UpdateProfileRequest;
 import com.github.ideantifyserver.domain.user.dto.response.SimpleUserResponse;
+import com.github.ideantifyserver.domain.user.dto.response.TrendingIssueResponse;
 import com.github.ideantifyserver.domain.user.dto.response.UserResponse;
 import com.github.ideantifyserver.domain.user.entity.User;
 import com.github.ideantifyserver.domain.user.service.UserService;
@@ -27,6 +28,7 @@ public class UserController {
 
     private final UserService userService;
 
+
     @GetMapping("/me")
     @Operation(summary = "내 정보 조회")
     public ApiResponse<UserResponse> getMyProfile(
@@ -37,7 +39,7 @@ public class UserController {
     }
 
     @GetMapping("/{user}")
-    @Operation(summary = "다른 사람 정보 조회")
+    @Operation(summary = "다른 사용자 정보 조회")
     public ApiResponse<UserResponse> getUserProfile(
             @Parameter(description = "유저 ID", schema = @Schema(type = "string", format = "uuid")) @PathVariable User user
     ) {
@@ -45,13 +47,22 @@ public class UserController {
         return ApiResponse.ok(userService.getMyProfile(user));
     }
 
+
     @GetMapping
-    @Operation(summary = "유저 검색")
+    @Operation(summary = "사용자 검색")
     public ApiResponse<List<SimpleUserResponse>> searchUsers(
             @RequestParam(required = false) String query
     ) {
 
         return ApiResponse.ok(userService.searchUsers(query));
+    }
+
+    @GetMapping("/issues")
+    @Operation(summary = "요즘 뜨는 이슈 목록 조회")
+    public ApiResponse<List<TrendingIssueResponse>> getTrendingIssues(
+            @CurrentUser User user
+    ) {
+        return ApiResponse.ok(userService.getTrendingIssues(user));
     }
 
     @PutMapping("/me")
@@ -60,7 +71,6 @@ public class UserController {
             @CurrentUser User user,
             @RequestBody @Valid UpdateProfileRequest request
     ) {
-
         return ApiResponse.ok(userService.updateMyProfile(user, request));
     }
 }

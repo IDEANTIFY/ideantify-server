@@ -22,8 +22,10 @@ public class InnerProjectLikeController {
 
     private final InnerProjectService innerProjectService;
 
+    // ==================== 좋아요 ====================
+
     @PostMapping("/{project}/like")
-    @Operation(summary = "프로젝트 좋아요 추가")
+    @Operation(summary = "좋아요 추가")
     public ApiResponse<ProjectLikeResponseDto> likeProject(
             @DomainParameter(description = "프로젝트 ID") @PathVariable InnerProject project,
             @CurrentUser User user
@@ -32,7 +34,7 @@ public class InnerProjectLikeController {
     }
 
     @DeleteMapping("/{project}/like")
-    @Operation(summary = "프로젝트 좋아요 삭제")
+    @Operation(summary = "좋아요 삭제")
     public ApiResponse<ProjectLikeResponseDto> unlikeProject(
             @DomainParameter(description = "프로젝트 ID") @PathVariable InnerProject project,
             @CurrentUser User user

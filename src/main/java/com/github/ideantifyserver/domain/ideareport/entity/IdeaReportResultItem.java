@@ -18,6 +18,14 @@ public class IdeaReportResultItem  extends BaseSchema {
 
     @Column(nullable = false)
     @NotBlank
+    String title;
+
+    @Column(nullable = false)
+    @NotBlank
+    String keyword;
+
+    @Column(nullable = false)
+    @NotBlank
     String link;
 
     @Column(nullable = false)

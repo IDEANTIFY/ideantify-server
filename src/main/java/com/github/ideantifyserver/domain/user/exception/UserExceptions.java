@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 public enum UserExceptions implements ApiExceptionCode {
 
     ALREADY_EXIST("USER_001", "이미 사용 중인 닉네임입니다."),
+    AI_API_CALL_FAILED("USER_002", "AI API 호출에 실패했습니다."),
+    NO_KEYWORDS_FOUND("USER_003", "유저의 키워드가 없습니다.")
     ;
 
     private final String code;
