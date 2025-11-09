@@ -1,5 +1,5 @@
-# Azul Zulu OpenJDK 21 (JRE 포함)
-FROM azul/zulu-openjdk:21
+# 멀티아키 지원되는 Temurin JRE 21 사용
+FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
