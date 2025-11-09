@@ -7,6 +7,7 @@ import com.github.ideantifyserver.domain.ideareport.repository.IdeaReportTaskRep
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -20,7 +21,7 @@ import java.util.UUID;
 public class IdeaReportMetadataResponseListener {
     private final IdeaReportTaskRepository ideaReportTaskRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    private final ObjectMapper objectMapper;
+    private final @Qualifier("sqsObjectMapper") ObjectMapper sqsObjectMapper;
 
     private static final String HDR_MESSAGE_TYPE = "messageType";
     private static final String MESSAGE_TYPE     = "IDEA_REPORT";
@@ -47,7 +48,7 @@ public class IdeaReportMetadataResponseListener {
             }
 
             task.setStatus(IdeaReportTask.Status.SUCCEEDED);
-            task.setResultJson(objectMapper.writeValueAsString(payload));
+            task.setResultJson(sqsObjectMapper.writeValueAsString(payload));
             ideaReportTaskRepository.save(task);
 
             messagingTemplate.convertAndSend("/topic/idea-reports/metadata/" + jobId, payload);

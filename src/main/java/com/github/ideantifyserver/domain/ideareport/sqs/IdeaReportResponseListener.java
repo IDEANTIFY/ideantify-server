@@ -11,6 +11,7 @@ import com.github.ideantifyserver.domain.ideareport.repository.IdeaReportInputRe
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
@@ -26,7 +27,7 @@ public class IdeaReportResponseListener {
 
     private final IdeaReportInputRepository inputRepository;
     private final SimpMessagingTemplate messagingTemplate;
-    private final ObjectMapper om;
+    private final @Qualifier("sqsObjectMapper") ObjectMapper sqsObjectMapper;
 
     private static final String HDR_TYPE = "messageType";
     private static final String HDR_INPUT_ID = "inputId";
@@ -43,7 +44,7 @@ public class IdeaReportResponseListener {
 
         UUID inputId = UUID.fromString(inputIdStr);
         try {
-            AiIdeaReportResultMessage resultMessage = om.readValue(message.getPayload(), AiIdeaReportResultMessage.class);
+            AiIdeaReportResultMessage resultMessage = sqsObjectMapper.readValue(message.getPayload(), AiIdeaReportResultMessage.class);
             AiIdeaReportResultMessage.ReportSummary summary = resultMessage.getSummaryReport().getReportSummary();
             AiIdeaReportResultMessage.EvaluationScoresDto scores = summary.getEvaluationScores();
 

@@ -10,6 +10,7 @@ import com.github.ideantifyserver.global.property.SqsProperty;
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import io.awspring.cloud.sqs.operations.SqsTemplate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
@@ -21,12 +22,12 @@ public class SqsService {
 
     private final SqsTemplate sqsTemplate;
     private final SqsProperty sqsProperty;
-    private final ObjectMapper objectMapper;
+    private final @Qualifier("sqsObjectMapper") ObjectMapper sqsObjectMapper;
     private final AiResponseProcessor aiResponseProcessor;
 
     public void sendAiChatRequest(AiChatRequestMessage message, ChatRoom.ChatRoomType type) {
         try {
-            String messageBody = objectMapper.writeValueAsString(message);
+            String messageBody = sqsObjectMapper.writeValueAsString(message);
 
             // 타입별로 다른 queue로 전송
             String queueUrl = switch (type) {
@@ -53,7 +54,7 @@ public class SqsService {
             String headerChatRoomId = (String) message.getHeaders().get("chatRoomId");
 
             String messageBody = message.getPayload();
-            AiChatResponseMessage response = objectMapper.readValue(messageBody, AiChatResponseMessage.class);
+            AiChatResponseMessage response = sqsObjectMapper.readValue(messageBody, AiChatResponseMessage.class);
 
             if (headerChatRoomId != null && !headerChatRoomId.equals(response.getChatRoomId().toString())) {
                 throw ChatExceptionCode.CHAT_ROOM_ID_MISMATCH.toException();
@@ -73,7 +74,7 @@ public class SqsService {
             String headerChatRoomId = (String) message.getHeaders().get("chatRoomId");
 
             String messageBody = message.getPayload();
-            AiChatResponseMessage response = objectMapper.readValue(messageBody, AiChatResponseMessage.class);
+            AiChatResponseMessage response = sqsObjectMapper.readValue(messageBody, AiChatResponseMessage.class);
 
             if (headerChatRoomId != null && !headerChatRoomId.equals(response.getChatRoomId().toString())) {
                 throw ChatExceptionCode.CHAT_ROOM_ID_MISMATCH.toException();
@@ -93,7 +94,7 @@ public class SqsService {
             String headerChatRoomId = (String) message.getHeaders().get("chatRoomId");
 
             String messageBody = message.getPayload();
-            AiChatResponseMessage response = objectMapper.readValue(messageBody, AiChatResponseMessage.class);
+            AiChatResponseMessage response = sqsObjectMapper.readValue(messageBody, AiChatResponseMessage.class);
 
             if (headerChatRoomId != null && !headerChatRoomId.equals(response.getChatRoomId().toString())) {
                 throw ChatExceptionCode.CHAT_ROOM_ID_MISMATCH.toException();

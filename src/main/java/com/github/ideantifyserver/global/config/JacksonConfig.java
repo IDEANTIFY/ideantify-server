@@ -9,7 +9,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 @Configuration
 public class JacksonConfig {
 
-    @Bean
+    @Bean("sqsObjectMapper")
     public ObjectMapper objectMapper(Jackson2ObjectMapperBuilder builder) {
         return builder
                 .propertyNamingStrategy(new PropertyNamingStrategies.SnakeCaseStrategy())
