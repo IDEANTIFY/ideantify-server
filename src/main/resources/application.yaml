@@ -2,6 +2,7 @@ server:
   port: ${SERVER_PORT:8080}
   servlet:
     context-path: /api
+  forward-headers-strategy: framework
 spring:
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:ideantify}
@@ -82,15 +83,13 @@ spring.cloud:
       bucket: ${AWS_S3_BUCKET_NAME:dummy-bucket}
     sqs:
       enabled: ${AWS_SQS_ENABLED:true}
-      chat:
-        request-queue:
-          user: ${AWS_SQS_CHAT_USER_REQUEST_QUEUE}
-          develop: ${AWS_SQS_CHAT_DEVELOP_REQUEST_QUEUE}
-          idea-report: ${AWS_SQS_CHAT_IDEA_REPORT_REQUEST_QUEUE}
-        response-queue:
-          user: ${AWS_SQS_CHAT_USER_RESPONSE_QUEUE}
-          develop: ${AWS_SQS_CHAT_DEVELOP_RESPONSE_QUEUE}
-          idea-report: ${AWS_SQS_CHAT_IDEA_REPORT_RESPONSE_QUEUE}
+      queue:
+        user-chat-request: ${AWS_SQS_CHAT_USER_REQUEST_QUEUE}
+        develop-chat-request: ${AWS_SQS_CHAT_DEVELOP_REQUEST_QUEUE}
+        idea-report-chat-request: ${AWS_SQS_CHAT_IDEA_REPORT_REQUEST_QUEUE}
+        user-chat-response: ${AWS_SQS_CHAT_USER_RESPONSE_QUEUE}
+        develop-chat-response: ${AWS_SQS_CHAT_DEVELOP_RESPONSE_QUEUE}
+        idea-report-chat-response: ${AWS_SQS_CHAT_IDEA_REPORT_RESPONSE_QUEUE}
       idea-report:
         request-queue: ${IDEA_REPORT_SQS_REQUEST_QUEUE}
         response-queue: ${IDEA_REPORT_SQS_RESPONSE_QUEUE}
