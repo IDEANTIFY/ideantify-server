@@ -182,6 +182,7 @@ public class ChatService {
         }
 
         return UserChatSendResponseDto.of(
+                chatRoomId,
                 userMessage.getId(),
                 content
         );
