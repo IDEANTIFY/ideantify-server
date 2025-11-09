@@ -18,6 +18,7 @@ public class ProjectListResponseDto {
     UUID id;
     String image;
     String subject;
+    String description;
     List<String> keywords;
     List<UUID> members;
 
@@ -27,6 +28,7 @@ public class ProjectListResponseDto {
                 project.getId(),
                 project.getImage(),
                 project.getSubject(),
+                project.getDescription(),
                 project.getKeywords().stream()
                         .map(InnerProjectKeyword::getKeyword)
                         .map(Keyword::getName)
