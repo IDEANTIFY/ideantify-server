@@ -1,10 +1,12 @@
 package com.github.ideantifyserver.domain.user.dto.response;
 
+import com.github.ideantifyserver.domain.keyword.dto.response.KeywordResponse;
 import com.github.ideantifyserver.domain.user.entity.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -28,6 +30,8 @@ public class UserResponse {
 
     PortfolioResponse portfolio;
 
+    List<KeywordResponse> keywords;
+
     public static UserResponse from(User user) {
 
         return UserResponse.of(
@@ -38,7 +42,10 @@ public class UserResponse {
                 user.getFollowers().size(),
                 user.getFollowings().size(),
                 user.getProjects().size(),
-                PortfolioResponse.from(user.getSocial())
+                PortfolioResponse.from(user.getSocial()),
+                user.getKeywords().stream()
+                        .map(userDomain -> KeywordResponse.from(userDomain.getKeyword()))
+                        .toList()
         );
     }
 }
