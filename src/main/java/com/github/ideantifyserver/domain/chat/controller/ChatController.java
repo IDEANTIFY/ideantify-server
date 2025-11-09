@@ -23,7 +23,12 @@ public class ChatController {
     private final ChatService chatService;
 
     @PostMapping("/api/users/rooms")
-    @Operation(summary = "일반 채팅방 생성")
+    @Operation(
+            summary = "일반 채팅방 생성",
+            description = """
+                    WebSocket Topic 형식:`/topic/chatRooms/{chatRoomId}`
+                    """
+    )
     public ApiResponse<CreateChatRoomResponseDto> createChatRoom(
             @CurrentUser(required = false) User user,
             @RequestBody @Valid CreateChatRoomRequestDto request
@@ -32,7 +37,12 @@ public class ChatController {
     }
 
     @PostMapping("/api/develop/rooms")
-    @Operation(summary = "아이디어 디벨롭 채팅방 생성")
+    @Operation(
+            summary = "아이디어 디벨롭 채팅방 생성",
+            description = """
+                    WebSocket Topic 형식:`/topic/chatRooms/{chatRoomId}`
+                    """
+    )
     public ApiResponse<CreateChatRoomResponseDto> createDevelopChatRoom(
             @CurrentUser(required = false) User user,
             @RequestBody @Valid CreateChatRoomRequestDto request
@@ -41,7 +51,12 @@ public class ChatController {
     }
 
     @PostMapping("/api/idea-reports/{ideaReportId}/rooms")
-    @Operation(summary = "아이디어 리포트 채팅방 생성")
+    @Operation(
+            summary = "아이디어 리포트 채팅방 생성",
+            description = """
+                    WebSocket Topic 형식:`/topic/chatRooms/{chatRoomId}`
+                    """
+    )
     public ApiResponse<CreateChatRoomResponseDto> createIdeaReportChatRoom(
             @CurrentUser User user,
             @PathVariable("ideaReportId") UUID ideaReportId,
@@ -60,7 +75,12 @@ public class ChatController {
     }
 
     @PostMapping("/api/users/rooms/{chatRoomId}")
-    @Operation(summary = "메시지 전송")
+    @Operation(
+            summary = "메시지 전송",
+            description = """
+                    WebSocket Topic 형식:`/topic/chatRooms/{chatRoomId}`
+                    """
+    )
     public ApiResponse<UserChatSendResponseDto> sendUserChat(
             @CurrentUser(required = false) User user,
             @PathVariable("chatRoomId") UUID chatRoomId,
@@ -70,7 +90,7 @@ public class ChatController {
     }
 
     @GetMapping("/api/users/rooms/{chatRoomId}")
-    @Operation(summary = "메시지 조회")
+    @Operation(summary = "채팅 메시지 목록 조회")
     public ApiResponse<ChatMessageListResponseDto> getUserChatMessages(
             @CurrentUser(required = false) User user,
             @PathVariable("chatRoomId") UUID chatRoomId,
