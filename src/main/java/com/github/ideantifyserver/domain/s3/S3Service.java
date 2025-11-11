@@ -108,4 +108,30 @@ public class S3Service {
         int i = filename.lastIndexOf('.');
         return (i > -1 && i < filename.length() - 1) ? filename.substring(i + 1) : null;
     }
+
+    public UrlResponseDto uploadAvatar(MultipartFile file) {
+        String ct = file.getContentType();
+        if (ct == null || !IMAGE_CONTENT_TYPES.contains(ct.toLowerCase())) {
+            throw S3Exceptions.INVALID_CONTENT_TYPE.toException();
+        }
+
+        String filename = sanitize(file.getOriginalFilename());
+        String key = "users/avatars/%s_%s".formatted(UUID.randomUUID(), filename);
+
+        try (InputStream in = file.getInputStream()) {
+            s3Client.putObject(
+                    PutObjectRequest.builder()
+                            .bucket(bucket)
+                            .key(key)
+                            .contentType(ct)
+                            .build(),
+                    RequestBody.fromInputStream(in, file.getSize())
+            );
+        } catch (Exception e) {
+            log.error("Failed to upload avatar: {}", e.getMessage(), e);
+            throw S3Exceptions.UPLOAD_FAIL.toException();
+        }
+
+        return UrlResponseDto.of(publicUrl(bucket, region, key));
+    }
 }

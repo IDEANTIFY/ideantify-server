@@ -23,4 +23,9 @@ public class S3Controller {
     public ApiResponse<UrlResponseDto> uploadFile(@RequestPart("file") MultipartFile file) {
         return ApiResponse.ok(s3Service.uploadFile(file));
     }
+
+    @PostMapping("/users/avatar")
+    public ApiResponse<UrlResponseDto> uploadAvatar(@RequestParam("file") MultipartFile file) {
+        return ApiResponse.ok(s3Service.uploadAvatar(file));
+    }
 }
