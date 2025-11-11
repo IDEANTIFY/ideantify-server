@@ -43,8 +43,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             };
         } else { // 최초 로그인 유저인 경우
             redirectUrl = switch (registrationId.toLowerCase()) {
-                case "google" -> String.format("%s?token=%s?onboarding=true", oauthProperty.getGoogle(), token);
-                case "kakao" -> String.format("%s?token=%s?onboarding=true", oauthProperty.getKakao(), token);
+                case "google" -> String.format("%s?token=%s&onboarding=true", oauthProperty.getGoogle(), token);
+                case "kakao" -> String.format("%s?token=%s&onboarding=true", oauthProperty.getKakao(), token);
                 default -> throw new IllegalArgumentException("지원하지 않는 OAuth2 제공자: " + registrationId);
             };
         }
