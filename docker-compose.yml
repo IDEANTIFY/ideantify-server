@@ -1,0 +1,33 @@
+version: "1.0"
+
+services:
+  ideantify-server:
+    image: ideantify/ideantify-server:1.0.9
+    container_name: ideantify-server
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - AI_API_URL=${AI_API_URL}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    depends_on:
+      - ai-server
+    networks:
+      - ideantify-net
+
+  ai-server:
+    build: ./identify-ai  # FastAPI 코드가 있는 디렉토리
+    container_name: ai-server
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./identify-ai/dataset:/app/dataset  # 유저 정보 저장 디렉토리
+    command: uvicorn app_chatbot.main:app --host 0.0.0.0 --port 8000
+    networks:
+      - ideantify-net
+
+networks:
+  ideantify-net:
+    driver: bridge
