@@ -12,6 +12,7 @@ public class CorsConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins(
                         "http://localhost:3000",
+                        "https://ideantify.wink.io.kr",
                         "https://api.ideantify.wink.io.kr"
                 )
                 .allowedMethods("GET","POST","PUT","PATCH","DELETE","OPTIONS")

@@ -27,6 +27,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addMapping("/api/**")
                 .allowedOrigins(
                         "http://localhost:3000",
+                        "https://ideantify.wink.io.kr",
                         "https://api.ideantify.wink.io.kr"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
