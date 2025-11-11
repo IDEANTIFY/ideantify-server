@@ -33,10 +33,12 @@ public class AiApiService {
                             .toList())
                     .build();
 
+            String targetUrl = aiApiUrl + "/user/info";
+
             log.info("Sending user info to AI API: userId={}, nickname={}, keywords={}",
                     request.getUserId(), request.getNickname(), request.getKeywords());
 
-            restTemplate.postForObject(aiApiUrl, request, Void.class);
+            restTemplate.postForObject(targetUrl, request, Void.class);
 
             log.info("user info 전송 성공");
         } catch (Exception e) {

@@ -59,6 +59,9 @@ app:
       callback:
         google: ${GOOGLE_CALLBACK_URL}
         kakao: ${KAKAO_CALLBACK_URL}
+ai:
+  api:
+    url: ${AI_API_URL}
 logging:
   level:
     org.springframework.security: TRACE
