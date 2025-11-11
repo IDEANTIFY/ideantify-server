@@ -11,20 +11,27 @@ import com.github.ideantifyserver.domain.user.exception.UserExceptions;
 import com.github.ideantifyserver.domain.user.repository.UserFollowRepository;
 import com.github.ideantifyserver.domain.user.repository.UserRepository;
 import com.github.ideantifyserver.global.exception.GlobalExceptions;
+import com.github.ideantifyserver.global.infra.ai.service.AiIssueService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Limit;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final UserFollowRepository userFollowRepository;
+
+    private final AiIssueService aiIssueService;
 
     @Transactional(readOnly = true)
     public UserResponse getMyProfile(User user) {
@@ -53,8 +60,15 @@ public class UserService {
             throw UserExceptions.NO_KEYWORDS_FOUND.toException();
         }
 
-        // TODO: 실제 AI API 호출로 교체
-        return List.of();
+        CompletableFuture<List<TrendingIssueResponse>> future =
+                aiIssueService.fetchTrendingIssuesAsync(keywords);
+
+        try {
+            return future.get(10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.error("AI 트렌드 이슈 요청 실패", e);
+            return List.of();
+        }
     }
 
     @Transactional
