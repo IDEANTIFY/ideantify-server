@@ -9,8 +9,6 @@ public interface UpsertProjectRequestDto {
 
     String getSubject();
 
-    List<String> getKeywords();
-
     String getGithub();
 
     List<UUID> getMembers();

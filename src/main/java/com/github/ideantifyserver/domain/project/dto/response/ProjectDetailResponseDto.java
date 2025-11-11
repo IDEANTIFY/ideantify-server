@@ -18,7 +18,6 @@ public class ProjectDetailResponseDto {
     LocalDateTime updatedAt;
     String image;
     String subject;
-    List<String> keywords;
     String github;
     List<UUID> members;
     List<String> files;
@@ -34,9 +33,6 @@ public class ProjectDetailResponseDto {
                 project.getUpdatedAt(),
                 project.getImage(),
                 project.getSubject(),
-                project.getKeywords().stream()
-                        .map(k -> k.getKeyword().getName())
-                        .toList(),
                 project.getGithub(),
                 project.getMembers().stream()
                         .map(m -> m.getUser().getId())
