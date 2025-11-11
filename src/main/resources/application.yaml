@@ -63,7 +63,7 @@ app:
 
 ai:
   api:
-    url: ${AI_API_URL:http://localhost:8000/}
+    url: ${AI_API_URL:http://localhost:8000}
 
 logging:
   level:
