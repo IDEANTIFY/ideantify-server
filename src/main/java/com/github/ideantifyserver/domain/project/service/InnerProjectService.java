@@ -1,7 +1,5 @@
 package com.github.ideantifyserver.domain.project.service;
 
-import com.github.ideantifyserver.domain.keyword.entity.Keyword;
-import com.github.ideantifyserver.domain.keyword.repository.KeywordRepository;
 import com.github.ideantifyserver.domain.project.dto.request.CreateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.request.UpdateProjectRequestDto;
 import com.github.ideantifyserver.domain.project.dto.response.*;
@@ -34,7 +32,6 @@ public class InnerProjectService {
     private final InnerProjectCommentRepository innerProjectCommentRepository;
     private final InnerProjectBookmarkRepository innerProjectBookmarkRepository;
     private final InnerProjectLikeRepository innerProjectLikeRepository;
-    private final KeywordRepository keywordRepository;
     private final UserRepository userRepository;
 
     @Transactional
@@ -76,40 +73,8 @@ public class InnerProjectService {
             );
         }
 
-        List<String> names = Optional.ofNullable(req.getKeywords()).orElseGet(List::of).stream()
-                .filter(Objects::nonNull)
-                .map(String::trim)
-                .filter(s -> !s.isBlank())
-                .distinct()
-                .toList();
-
-        Map<String, Keyword> keywordMap = ensureKeywords(names);
-
-        names.forEach(n -> project.getKeywords().add(InnerProjectKeyword.builder()
-                        .project(project)
-                        .keyword(keywordMap.get(n))
-                        .build())
-        );
-
         InnerProject saved = innerProjectRepository.save(project);
         return ProjectResponseDto.from(saved);
-    }
-
-    private Map<String, Keyword> ensureKeywords(List<String> names) {
-        if (names.isEmpty()) return Map.of();
-
-        Map<String, Keyword> byName = keywordRepository.findByNameIn(names).stream()
-                .collect(Collectors.toMap(Keyword::getName, k -> k, (a, b)->a));
-
-        List<Keyword> toCreate = names.stream()
-                .filter(n -> !byName.containsKey(n))
-                .map(n -> Keyword.builder().name(n).build())
-                .toList();
-
-        if (!toCreate.isEmpty()) {
-            keywordRepository.saveAll(toCreate).forEach(k -> byName.put(k.getName(), k));
-        }
-        return byName;
     }
 
     @Transactional(readOnly = true)
@@ -213,25 +178,6 @@ public class InnerProjectService {
                         .build())
                 .toList();
         project.updateMembers(newMembers);
-
-        List<String> names = Optional.ofNullable(req.getKeywords()).orElseGet(List::of).stream()
-                .filter(Objects::nonNull)
-                .map(String::trim)
-                .filter(s -> !s.isBlank())
-                .distinct()
-                .toList();
-
-        if (names.isEmpty() && req.getKeywords() != null && !req.getKeywords().isEmpty()) {
-            throw GlobalExceptions.INVALID_REQUEST.toException();
-        }
-
-        Map<String, Keyword> keywordMap = ensureKeywords(names);
-        List<InnerProjectKeyword> newKeywords = names.stream()
-                .map(k -> InnerProjectKeyword.builder()
-                        .keyword(keywordMap.get(k))
-                        .build())
-                .toList();
-        project.updateKeywords(newKeywords);
 
         return ProjectResponseDto.from(project);
     }

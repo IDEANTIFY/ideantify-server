@@ -20,8 +20,6 @@ public class UpdateProjectRequestDto implements UpsertProjectRequestDto {
     @NotBlank
     String subject;
 
-    List<String> keywords;
-
     String github;
 
     List<UUID> members;

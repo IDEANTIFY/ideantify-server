@@ -20,7 +20,6 @@ public class IdeaReportResultItem  extends BaseSchema {
     @NotBlank
     String title;
 
-    @Column(nullable = false)
     @NotBlank
     String keyword;
 

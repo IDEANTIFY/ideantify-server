@@ -1,8 +1,6 @@
 package com.github.ideantifyserver.domain.project.dto.response;
 
-import com.github.ideantifyserver.domain.keyword.entity.Keyword;
 import com.github.ideantifyserver.domain.project.entity.InnerProject;
-import com.github.ideantifyserver.domain.project.entity.InnerProjectKeyword;
 import com.github.ideantifyserver.domain.project.entity.InnerProjectMember;
 import com.github.ideantifyserver.global.infra.mysql.BaseSchema;
 import lombok.AllArgsConstructor;
@@ -19,7 +17,6 @@ public class ProjectListResponseDto {
     String image;
     String subject;
     String description;
-    List<String> keywords;
     List<UUID> members;
 
     public static ProjectListResponseDto from(InnerProject project) {
@@ -29,10 +26,6 @@ public class ProjectListResponseDto {
                 project.getImage(),
                 project.getSubject(),
                 project.getDescription(),
-                project.getKeywords().stream()
-                        .map(InnerProjectKeyword::getKeyword)
-                        .map(Keyword::getName)
-                        .toList(),
                 project.getMembers().stream()
                         .map(InnerProjectMember::getUser)
                         .map(BaseSchema::getId)
