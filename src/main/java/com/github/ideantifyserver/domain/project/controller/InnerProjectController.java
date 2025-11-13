@@ -51,7 +51,7 @@ public class InnerProjectController {
             @RequestParam(defaultValue = "false") boolean bookmark,
             @RequestParam(defaultValue = "false") boolean like,
             @RequestParam(defaultValue = "false") boolean own,
-            @DomainParameter(description = "타겟 유저 ID") @RequestParam User user,
+            @DomainParameter(description = "타겟 유저 ID") @RequestParam(required = false) User user,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @CurrentUser User me
     ) {
