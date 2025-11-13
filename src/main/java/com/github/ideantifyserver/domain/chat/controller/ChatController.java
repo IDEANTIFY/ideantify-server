@@ -11,10 +11,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
+@PreAuthorize("isAuthenticated()")
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "[Chat]")
@@ -30,7 +32,7 @@ public class ChatController {
                     """
     )
     public ApiResponse<CreateChatRoomResponseDto> createChatRoom(
-            @CurrentUser(required = false) User user,
+            @CurrentUser User user,
             @RequestBody @Valid CreateChatRoomRequestDto request
     ) {
         return ApiResponse.ok(chatService.createChatRoom(user, request.getContent()));
@@ -44,7 +46,7 @@ public class ChatController {
                     """
     )
     public ApiResponse<CreateChatRoomResponseDto> createDevelopChatRoom(
-            @CurrentUser(required = false) User user,
+            @CurrentUser User user,
             @RequestBody @Valid CreateChatRoomRequestDto request
     ) {
         return ApiResponse.ok(chatService.createDevelopChatRoom(user, request.getContent()));
@@ -82,7 +84,7 @@ public class ChatController {
                     """
     )
     public ApiResponse<UserChatSendResponseDto> sendUserChat(
-            @CurrentUser(required = false) User user,
+            @CurrentUser User user,
             @PathVariable("chatRoomId") UUID chatRoomId,
             @RequestBody @Valid UserChatRequestDto request
     ) {
@@ -92,7 +94,7 @@ public class ChatController {
     @GetMapping("/users/rooms/{chatRoomId}")
     @Operation(summary = "채팅 메시지 목록 조회")
     public ApiResponse<ChatMessageListResponseDto> getUserChatMessages(
-            @CurrentUser(required = false) User user,
+            @CurrentUser User user,
             @PathVariable("chatRoomId") UUID chatRoomId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size

@@ -13,11 +13,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
 
+@PreAuthorize("isAuthenticated()")
 @RestController
 @RequestMapping("/idea-reports")
 @RequiredArgsConstructor
@@ -70,7 +72,7 @@ public class IdeaReportController {
     })
     public ApiResponse<JobIdWebsocketTopicResponseDto> createIdeaReport(
             @RequestBody @Valid CreateIdeaReportRequestDto requestDto,
-            @CurrentUser(required = false) User user
+            @CurrentUser User user
     ) {
         UUID id = ideaReportService.createIdeaReport(requestDto, user);
         return ApiResponse.ok(JobIdWebsocketTopicResponseDto.of(
@@ -80,7 +82,7 @@ public class IdeaReportController {
     }
 
     @GetMapping("/results")
-    public ApiResponse<List<IdeaReportListResponseDto>> getIdeaReportList(@CurrentUser(required = false) User user) {
+    public ApiResponse<List<IdeaReportListResponseDto>> getIdeaReportList(@CurrentUser User user) {
         return ApiResponse.ok(ideaReportService.getIdeaReportList(user));
     }
 

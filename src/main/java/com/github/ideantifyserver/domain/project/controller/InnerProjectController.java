@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@PreAuthorize("isAuthenticated()")
 @Tag(name = "[Project]")
 @RestController
 @RequestMapping("/projects")
@@ -35,7 +36,6 @@ public class InnerProjectController {
 
     @PostMapping
     @Operation(summary = "프로젝트 등록")
-    @PreAuthorize("isAuthenticated()")
     public ApiResponse<ProjectResponseDto> createProject(
             @RequestBody @Valid CreateProjectRequestDto req,
             @CurrentUser User user
@@ -51,9 +51,9 @@ public class InnerProjectController {
             @RequestParam(defaultValue = "false") boolean bookmark,
             @RequestParam(defaultValue = "false") boolean like,
             @RequestParam(defaultValue = "false") boolean own,
-            @DomainParameter(description = "타겟 유저 ID") @RequestParam(required = false) User user,
+            @DomainParameter(description = "타겟 유저 ID") @RequestParam User user,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            @CurrentUser(required = false) User me
+            @CurrentUser User me
     ) {
         return ApiResponse.ok(innerProjectService.getProjectList(bookmark, like, own, user, pageable, me));
     }
@@ -70,7 +70,6 @@ public class InnerProjectController {
 
     @PutMapping("/{project}")
     @Operation(summary = "프로젝트 수정")
-    @PreAuthorize("isAuthenticated()")
     public ApiResponse<ProjectResponseDto> updateProject(
             @DomainParameter(description = "프로젝트 ID") @PathVariable InnerProject project,
             @RequestBody @Valid UpdateProjectRequestDto req,
@@ -83,7 +82,6 @@ public class InnerProjectController {
 
     @DeleteMapping("/{project}")
     @Operation(summary = "프로젝트 삭제")
-    @PreAuthorize("isAuthenticated()")
     public ApiResponse<Void> deleteProject(
             @DomainParameter(description = "프로젝트 ID") @PathVariable InnerProject project,
             @CurrentUser User user
