@@ -12,7 +12,10 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+import software.amazon.awssdk.services.sqs.model.MessageAttributeValue;
 
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -26,21 +29,21 @@ public class IdeaReportMetadataResponseListener {
     @SqsListener("${spring.cloud.aws.sqs.idea-report-metadata.response-queue}")
     public void onResponse(Message<CreateIdeaReportMetadataResponseDto> message) {
         log.info("[SQS] 아이디어 리포트 메타데이터 응답 수신");
-        
+
         MessageHeaders headers = message.getHeaders();
-        log.info("헤더: {}", headers);
-        
-        UUID id = UUID.fromString(String.valueOf(headers.get("id")));
+
+        software.amazon.awssdk.services.sqs.model.Message sqsMessage =
+                (software.amazon.awssdk.services.sqs.model.Message) headers.get("Sqs_SourceData");
+
+        Map<String, MessageAttributeValue> attributes = Objects.requireNonNull(sqsMessage).messageAttributes();
+
+        UUID id = UUID.fromString(attributes.get("id").stringValue());
 
         CreateIdeaReportMetadataResponseDto payload = message.getPayload();
 
         try {
-            IdeaReportTask task = ideaReportTaskRepository.findById(id).orElse(null);
-
-            if (task == null) {
-                log.warn("응답 수신했지만 id를 못찾음: {}", id);
-                return;
-            }
+            IdeaReportTask task = ideaReportTaskRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("아이디어 리포트 작업을 찾을 수 없습니다: " + id));
 
             task.setStatus(IdeaReportTask.Status.SUCCEEDED);
             task.setResultJson(sqsObjectMapper.writeValueAsString(payload));
