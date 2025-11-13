@@ -22,7 +22,7 @@ public class ChatController {
 
     private final ChatService chatService;
 
-    @PostMapping("/api/users/rooms")
+    @PostMapping("/users/rooms")
     @Operation(
             summary = "일반 채팅방 생성",
             description = """
@@ -36,7 +36,7 @@ public class ChatController {
         return ApiResponse.ok(chatService.createChatRoom(user, request.getContent()));
     }
 
-    @PostMapping("/api/develop/rooms")
+    @PostMapping("/develop/rooms")
     @Operation(
             summary = "아이디어 디벨롭 채팅방 생성",
             description = """
@@ -50,7 +50,7 @@ public class ChatController {
         return ApiResponse.ok(chatService.createDevelopChatRoom(user, request.getContent()));
     }
 
-    @PostMapping("/api/idea-reports/{ideaReportId}/rooms")
+    @PostMapping("/idea-reports/{ideaReportId}/rooms")
     @Operation(
             summary = "아이디어 리포트 채팅방 생성",
             description = """
@@ -66,7 +66,7 @@ public class ChatController {
     }
 
 
-    @GetMapping("/api/users/rooms")
+    @GetMapping("/users/rooms")
     @Operation(summary = "채팅방 목록 조회")
     public ApiResponse<ChatRoomListResponseDto> getUserChatRooms(
             @CurrentUser User user
@@ -74,7 +74,7 @@ public class ChatController {
         return ApiResponse.ok(chatService.getChatRooms(user));
     }
 
-    @PostMapping("/api/users/rooms/{chatRoomId}")
+    @PostMapping("/users/rooms/{chatRoomId}")
     @Operation(
             summary = "메시지 전송",
             description = """
@@ -89,7 +89,7 @@ public class ChatController {
         return ApiResponse.ok(chatService.sendUserChat(user, chatRoomId, request.getContent()));
     }
 
-    @GetMapping("/api/users/rooms/{chatRoomId}")
+    @GetMapping("/users/rooms/{chatRoomId}")
     @Operation(summary = "채팅 메시지 목록 조회")
     public ApiResponse<ChatMessageListResponseDto> getUserChatMessages(
             @CurrentUser(required = false) User user,
