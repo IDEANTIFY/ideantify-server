@@ -18,7 +18,7 @@ public class IdeaReportSqsGateway {
     private String requestQueue;
 
     private static final String HDR_MESSAGE_TYPE = "messageType";
-    private static final String MESSAGE_TYPE     = "IDEA_REPORT_METADATA";
+    private static final String MESSAGE_TYPE     = "IDEA_REPORT_RESULT";
 
     public void publish(UUID inputId, CreateIdeaReportRequestDto dto, String responseQueue) {
         sqsTemplate.send(to -> to
