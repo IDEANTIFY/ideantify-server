@@ -23,27 +23,22 @@ public class IdeaReportMetadataResponseListener {
     private final SimpMessagingTemplate messagingTemplate;
     private final @Qualifier("sqsObjectMapper") ObjectMapper sqsObjectMapper;
 
-    private static final String HDR_MESSAGE_TYPE = "messageType";
-    private static final String MESSAGE_TYPE     = "IDEA_REPORT";
-
     @SqsListener("${spring.cloud.aws.sqs.idea-report-metadata.response-queue}")
     public void onResponse(Message<CreateIdeaReportMetadataResponseDto> message) {
+        log.info("[SQS] 아이디어 리포트 메타데이터 응답 수신");
+        
         MessageHeaders headers = message.getHeaders();
-        String type = String.valueOf(headers.get(HDR_MESSAGE_TYPE));
-        String id = String.valueOf(headers.get("jobId"));
+        log.info("헤더: {}", headers);
+        
+        UUID id = UUID.fromString(String.valueOf(headers.get("id")));
 
-        if (!MESSAGE_TYPE.equals(type) || id == null || id.equals("null")) {
-            log.debug("무시: type={}, jobId={}", type, id);
-            return;
-        }
-
-        UUID jobId = UUID.fromString(id);
         CreateIdeaReportMetadataResponseDto payload = message.getPayload();
 
         try {
-            IdeaReportTask task = ideaReportTaskRepository.findById(jobId).orElse(null);
+            IdeaReportTask task = ideaReportTaskRepository.findById(id).orElse(null);
+
             if (task == null) {
-                log.warn("응답 수신했지만 jobId를 못찾음: {}", jobId);
+                log.warn("응답 수신했지만 id를 못찾음: {}", id);
                 return;
             }
 
@@ -51,8 +46,8 @@ public class IdeaReportMetadataResponseListener {
             task.setResultJson(sqsObjectMapper.writeValueAsString(payload));
             ideaReportTaskRepository.save(task);
 
-            messagingTemplate.convertAndSend("/topic/idea-reports/metadata/" + jobId, payload);
-            log.info("웹소켓 푸시 완료: /topic/idea-reports/metadata/{}", jobId);
+            messagingTemplate.convertAndSend("/topic/idea-reports/metadata/" + id, payload);
+            log.info("웹소켓 푸시 완료: /topic/idea-reports/metadata/{}", id);
         } catch (Exception e) {
             log.error("응답 처리 중 오류", e);
             throw new RuntimeException(e);
