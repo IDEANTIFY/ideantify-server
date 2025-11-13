@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,28 +30,23 @@ public class IdeaReportResponseListener {
     private final SimpMessagingTemplate messagingTemplate;
     private final @Qualifier("sqsObjectMapper") ObjectMapper sqsObjectMapper;
 
-    private static final String HDR_TYPE = "messageType";
-    private static final String HDR_INPUT_ID = "inputId";
-    private static final String TYPE_RESULT = "IDEA_REPORT_RESULT";
-
     @Transactional
     @SqsListener("${spring.cloud.aws.sqs.idea-report.response-queue}")
     public void onResponse(Message<String> message) {
-        String type = String.valueOf(message.getHeaders().get(HDR_TYPE));
-        if (!TYPE_RESULT.equals(type)) return;
+        log.info("[SQS] 아이디어 리포트 응답 수신");
 
-        String inputIdStr = String.valueOf(message.getHeaders().get(HDR_INPUT_ID));
-        if (inputIdStr == null || "null".equals(inputIdStr)) return;
+        MessageHeaders headers = message.getHeaders();
+        log.info("헤더: {}", headers);
 
-        UUID inputId = UUID.fromString(inputIdStr);
+        UUID id = UUID.fromString(String.valueOf(headers.get("id")));
         try {
             AiIdeaReportResultMessage resultMessage = sqsObjectMapper.readValue(message.getPayload(), AiIdeaReportResultMessage.class);
             AiIdeaReportResultMessage.ReportSummary summary = resultMessage.getSummaryReport().getReportSummary();
             AiIdeaReportResultMessage.EvaluationScoresDto scores = summary.getEvaluationScores();
 
-            IdeaReportInput ideaReportInput = inputRepository.findById(inputId).orElse(null);
+            IdeaReportInput ideaReportInput = inputRepository.findById(id).orElse(null);
             if (ideaReportInput == null) {
-                log.warn("응답 수신했지만 inputId를 못찾음: {}", inputId);
+                log.warn("응답 수신했지만 id를 못찾음: {}", id);
                 return;
             }
 
@@ -111,8 +107,8 @@ public class IdeaReportResponseListener {
                                     ).toList()
                     );
 
-            messagingTemplate.convertAndSend("/topic/idea-reports/" + inputId, responseDto);
-            log.info("웹소켓 푸시 완료: /topic/idea-report/{}", inputId);
+            messagingTemplate.convertAndSend("/topic/idea-reports/" + id, responseDto);
+            log.info("웹소켓 푸시 완료: /topic/idea-report/{}", id);
         } catch (Exception e) {
             log.error("AI 응답 처리 실패", e);
             throw new RuntimeException(e);
