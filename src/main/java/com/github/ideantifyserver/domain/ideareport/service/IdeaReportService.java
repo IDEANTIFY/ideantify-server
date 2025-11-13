@@ -46,7 +46,7 @@ public class IdeaReportService {
                 .status(IdeaReportTask.Status.QUEUED)
                 .build();
 
-        taskRepository.save(task);
+        task = taskRepository.save(task);
 
         gateway.requestMetadata(task.getId(), request.getQuery(), ideaReportMetadataResponseQueue);
 
@@ -64,7 +64,7 @@ public class IdeaReportService {
                 .target(req.getTarget())
                 .user(user)
                 .build();
-        inputRepository.save(input);
+        input = inputRepository.save(input);
 
         metadataGateway.publish(input.getId(), req, ideaReportResponseQueue);
         return input.getId();
