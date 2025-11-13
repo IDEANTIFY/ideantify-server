@@ -12,7 +12,7 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class IdeaReportTask extends BaseSchema {
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     String query;
 
     @Enumerated(EnumType.STRING)
@@ -20,6 +20,7 @@ public class IdeaReportTask extends BaseSchema {
     private Status status;
 
     @Lob
+    @Column(columnDefinition = "TEXT")
     private String resultJson;
 
     private String errorMessage;

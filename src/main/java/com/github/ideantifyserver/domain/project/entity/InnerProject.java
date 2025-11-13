@@ -26,7 +26,7 @@ public class InnerProject extends BaseSchema {
     @Column
     String github;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @NotBlank
     String description;
 

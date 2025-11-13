@@ -26,7 +26,7 @@ public class IdeaReportResult extends BaseSchema {
     @NotNull
     Integer totalSimilarCases;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @NotBlank
     String analysisNarrative;
 

@@ -23,15 +23,15 @@ public class IdeaReportResultItem  extends BaseSchema {
     @NotBlank
     String keyword;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @NotBlank
     String link;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @NotBlank
     String thumbnail;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @NotBlank
     String summary;
 
@@ -39,7 +39,7 @@ public class IdeaReportResultItem  extends BaseSchema {
     @NotBlank
     String score;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @NotBlank
     String insight;
 

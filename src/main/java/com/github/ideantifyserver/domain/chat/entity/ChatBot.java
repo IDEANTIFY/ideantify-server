@@ -18,7 +18,7 @@ public class ChatBot extends BaseSchema {
     @NotNull
     ChatBotRole role;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @NotBlank
     String content;
 
