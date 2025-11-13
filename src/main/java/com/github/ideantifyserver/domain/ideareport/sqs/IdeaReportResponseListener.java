@@ -17,8 +17,11 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.services.sqs.model.MessageAttributeValue;
 
 import java.util.Comparator;
+import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -36,9 +39,14 @@ public class IdeaReportResponseListener {
         log.info("[SQS] 아이디어 리포트 응답 수신");
 
         MessageHeaders headers = message.getHeaders();
-        log.info("헤더: {}", headers);
 
-        UUID id = UUID.fromString(String.valueOf(headers.get("id")));
+        software.amazon.awssdk.services.sqs.model.Message sqsMessage =
+                (software.amazon.awssdk.services.sqs.model.Message) headers.get("Sqs_SourceData");
+
+        Map<String, MessageAttributeValue> attributes = Objects.requireNonNull(sqsMessage).messageAttributes();
+
+        UUID id = UUID.fromString(attributes.get("id").stringValue());
+
         try {
             AiIdeaReportResultMessage resultMessage = sqsObjectMapper.readValue(message.getPayload(), AiIdeaReportResultMessage.class);
             AiIdeaReportResultMessage.ReportSummary summary = resultMessage.getSummaryReport().getReportSummary();
