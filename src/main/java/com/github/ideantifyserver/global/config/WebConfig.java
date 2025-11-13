@@ -28,7 +28,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                         "http://localhost:3000",
                         "https://ideantify.wink.io.kr",
-                        "https://api.ideantify.wink.io.kr"
+                        "https://api.ideantify.wink.io.kr",
+                        "https://ideantify-client.vercel.app/"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
