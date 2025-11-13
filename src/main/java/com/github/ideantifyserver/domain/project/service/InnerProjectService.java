@@ -82,7 +82,7 @@ public class InnerProjectService {
             boolean bookmarked,
             boolean liked,
             boolean owned,
-            User user,
+            UUID userId,
             Pageable pageable,
             User me
     ) {
@@ -90,8 +90,8 @@ public class InnerProjectService {
 
         User targetUser = null;
         if (needUser) {
-            if (user != null) {
-                targetUser = user;
+            if (userId != null) {
+                targetUser = userRepository.findById(userId).orElseThrow(GlobalExceptions.INVALID_REQUEST::toException);
             } else {
                 targetUser = me;
             }

@@ -22,6 +22,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @PreAuthorize("isAuthenticated()")
 @Tag(name = "[Project]")
@@ -51,11 +52,11 @@ public class InnerProjectController {
             @RequestParam(defaultValue = "false") boolean bookmark,
             @RequestParam(defaultValue = "false") boolean like,
             @RequestParam(defaultValue = "false") boolean own,
-            @DomainParameter(description = "타겟 유저 ID") @RequestParam(required = false) User user,
+            @DomainParameter(description = "타겟 유저 ID") @RequestParam(required = false) UUID userId,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             @CurrentUser User me
     ) {
-        return ApiResponse.ok(innerProjectService.getProjectList(bookmark, like, own, user, pageable, me));
+        return ApiResponse.ok(innerProjectService.getProjectList(bookmark, like, own, userId, pageable, me));
     }
 
     @GetMapping("/{project}")
