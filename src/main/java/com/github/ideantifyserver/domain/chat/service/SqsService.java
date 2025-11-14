@@ -10,11 +10,13 @@ import com.github.ideantifyserver.global.property.SqsProperty;
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import io.awspring.cloud.sqs.operations.SqsTemplate;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @ConditionalOnProperty(name = "aws.sqs.enabled", havingValue = "true", matchIfMissing = false)
@@ -54,6 +56,8 @@ public class SqsService {
             String headerChatRoomId = (String) message.getHeaders().get("chatRoomId");
 
             String messageBody = message.getPayload();
+            log.info("SQS_MESSAGE 수신 [USER_CHAT]: headers={}, body={}", message.getHeaders(), messageBody);
+
             AiChatResponseMessage response = sqsObjectMapper.readValue(messageBody, AiChatResponseMessage.class);
 
             if (headerChatRoomId != null && !headerChatRoomId.equals(response.getChatRoomId().toString())) {
@@ -62,8 +66,10 @@ public class SqsService {
 
             aiResponseProcessor.processAiResponse(response);
         } catch (JsonProcessingException e) {
+            log.error("JSON 파싱 실패 [USER_CHAT]: {}", e.getMessage(), e);
             throw ChatExceptionCode.SQS_MESSAGE_PARSE_FAILED.toException();
         } catch (Exception e) {
+            log.error("메시지 처리 실패 [USER_CHAT]: {}", e.getMessage(), e);
             throw ChatExceptionCode.SQS_MESSAGE_PARSE_FAILED.toException();
         }
     }
@@ -74,6 +80,8 @@ public class SqsService {
             String headerChatRoomId = (String) message.getHeaders().get("chatRoomId");
 
             String messageBody = message.getPayload();
+            log.info("SQS_MESSAGE 수신 [DEVELOP_CHAT]: headers={}, body={}", message.getHeaders(), messageBody);
+
             AiChatResponseMessage response = sqsObjectMapper.readValue(messageBody, AiChatResponseMessage.class);
 
             if (headerChatRoomId != null && !headerChatRoomId.equals(response.getChatRoomId().toString())) {
@@ -82,8 +90,10 @@ public class SqsService {
 
             aiResponseProcessor.processAiResponse(response);
         } catch (JsonProcessingException e) {
+            log.error("JSON 파싱 실패 [DEVELOP_CHAT]: {}", e.getMessage(), e);
             throw ChatExceptionCode.SQS_MESSAGE_PARSE_FAILED.toException();
         } catch (Exception e) {
+            log.error("메시지 처리 실패 [DEVELOP_CHAT]: {}", e.getMessage(), e);
             throw ChatExceptionCode.SQS_MESSAGE_PARSE_FAILED.toException();
         }
     }
@@ -94,6 +104,8 @@ public class SqsService {
             String headerChatRoomId = (String) message.getHeaders().get("chatRoomId");
 
             String messageBody = message.getPayload();
+            log.info("SQS_MESSAGE 수신 [IDEA_REPORT_CHAT]: headers={}, body={}", message.getHeaders(), messageBody);
+
             AiChatResponseMessage response = sqsObjectMapper.readValue(messageBody, AiChatResponseMessage.class);
 
             if (headerChatRoomId != null && !headerChatRoomId.equals(response.getChatRoomId().toString())) {
@@ -102,8 +114,10 @@ public class SqsService {
 
             aiResponseProcessor.processAiResponse(response);
         } catch (JsonProcessingException e) {
+            log.error("JSON 파싱 실패 [IDEA_REPORT_CHAT]: {}", e.getMessage(), e);
             throw ChatExceptionCode.SQS_MESSAGE_PARSE_FAILED.toException();
         } catch (Exception e) {
+            log.error("메시지 처리 실패 [IDEA_REPORT_CHAT]: {}", e.getMessage(), e);
             throw ChatExceptionCode.SQS_MESSAGE_PARSE_FAILED.toException();
         }
     }
