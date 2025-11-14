@@ -32,18 +32,19 @@ public class IdeaReportResponseListener {
 
     @SqsListener("https://sqs.ap-northeast-2.amazonaws.com/749000350951/ideantify-idea-report-response.fifo")
     public void onResponse(Message<String> message) {
-        log.info("[SQS] 아이디어 리포트 응답 수신: {}", message.toString());
-
-        MessageHeaders headers = message.getHeaders();
-
-        software.amazon.awssdk.services.sqs.model.Message sqsMessage =
-                (software.amazon.awssdk.services.sqs.model.Message) headers.get("Sqs_SourceData");
-
-        Map<String, MessageAttributeValue> attributes = Objects.requireNonNull(sqsMessage).messageAttributes();
-
-        UUID id = UUID.fromString(attributes.get("id").stringValue());
-
         try {
+            log.info("[SQS] 아이디어 리포트 응답 수신: {}", message.toString());
+
+            MessageHeaders headers = message.getHeaders();
+
+            software.amazon.awssdk.services.sqs.model.Message sqsMessage =
+                    (software.amazon.awssdk.services.sqs.model.Message) headers.get("Sqs_SourceData");
+
+            Map<String, MessageAttributeValue> attributes = Objects.requireNonNull(sqsMessage).messageAttributes();
+
+            UUID id = UUID.fromString(attributes.get("id").stringValue());
+
+
             AiIdeaReportResultMessage resultMessage = sqsObjectMapper.readValue(message.getPayload(), AiIdeaReportResultMessage.class);
             AiIdeaReportResultMessage.ReportSummary summary = resultMessage.getSummaryReport().getReportSummary();
             AiIdeaReportResultMessage.EvaluationScoresDto scores = summary.getEvaluationScores();
@@ -111,9 +112,8 @@ public class IdeaReportResponseListener {
 
             messagingTemplate.convertAndSend("/topic/idea-reports/" + id, responseDto);
             log.info("웹소켓 푸시 완료: /topic/idea-report/{}", id);
-        } catch (Exception e) {
-            log.error("AI 응답 처리 실패", e);
-            throw new RuntimeException(e);
+        } catch (Throwable e) {
+            log.error("응답 처리 중 오류", e);
         }
     }
 
