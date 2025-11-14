@@ -11,13 +11,13 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserSocial extends BaseSchema {
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     String github;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     String linkedin;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     String instagram;
 
     @OneToOne(fetch = FetchType.LAZY)

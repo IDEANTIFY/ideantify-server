@@ -12,15 +12,16 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class IdeaReportResultItem  extends BaseSchema {
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @NotBlank
     String sourceType;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @NotBlank
     String title;
 
     @NotBlank
+    @Column(columnDefinition = "TEXT")
     String keyword;
 
     @Column(nullable = false, columnDefinition = "TEXT")
@@ -35,7 +36,7 @@ public class IdeaReportResultItem  extends BaseSchema {
     @NotBlank
     String summary;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @NotBlank
     String score;
 

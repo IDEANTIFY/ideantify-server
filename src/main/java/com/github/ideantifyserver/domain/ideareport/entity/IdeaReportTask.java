@@ -23,6 +23,7 @@ public class IdeaReportTask extends BaseSchema {
     @Column(columnDefinition = "TEXT")
     private String resultJson;
 
+    @Column(columnDefinition = "TEXT")
     private String errorMessage;
 
     public enum Status { QUEUED, RUNNING, SUCCEEDED, FAILED }

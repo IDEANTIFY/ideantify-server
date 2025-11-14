@@ -25,7 +25,7 @@ public class UserProvider extends BaseSchema {
     @Enumerated(EnumType.STRING)
     Provider provider;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @NotBlank
     String providerId;
 

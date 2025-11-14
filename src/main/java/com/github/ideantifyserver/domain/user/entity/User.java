@@ -23,16 +23,16 @@ public class User extends BaseSchema implements UserContext {
         return this.getId().toString();
     }
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, columnDefinition = "TEXT")
     @NotBlank
     String nickname;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, columnDefinition = "TEXT")
     @NotBlank
     @Email
     String email;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     String avatar;
 
     @OneToMany(mappedBy = "user", cascade =  CascadeType.ALL, orphanRemoval = true,  fetch = FetchType.LAZY)

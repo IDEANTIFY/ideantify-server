@@ -19,11 +19,11 @@ public class InnerProject extends BaseSchema {
     @NotBlank
     String image;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @NotBlank
     String subject;
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     String github;
 
     @Column(nullable = false, columnDefinition = "TEXT")

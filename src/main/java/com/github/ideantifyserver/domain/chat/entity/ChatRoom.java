@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class ChatRoom extends BaseSchema {
 
-    @Column
+    @Column(columnDefinition = "TEXT")
     String title;
 
     @Column(nullable = false)
