@@ -12,40 +12,32 @@ import lombok.*;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 public class IdeaReportResultItem  extends BaseSchema {
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    @NotBlank
+    @Column(columnDefinition = "TEXT")
     String sourceType;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    @NotBlank
+    @Column(columnDefinition = "TEXT")
     String title;
 
-    @NotBlank
     @Column(columnDefinition = "TEXT")
     String keyword;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    @NotBlank
+    @Column(columnDefinition = "TEXT")
     String link;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    @NotBlank
+    @Column(columnDefinition = "TEXT")
     String thumbnail;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    @NotBlank
+    @Column(columnDefinition = "TEXT")
     String summary;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    @NotBlank
+    @Column(columnDefinition = "TEXT")
     String score;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    @NotBlank
+    @Column(columnDefinition = "TEXT")
     String insight;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "idea_report_result_id", nullable = false)
+    @JoinColumn(name = "idea_report_result_id")
     IdeaReportResult result;
 
 }

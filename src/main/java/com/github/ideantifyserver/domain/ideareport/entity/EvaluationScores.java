@@ -17,14 +17,11 @@ import lombok.NoArgsConstructor;
 public class EvaluationScores {
 
     @Min(0) @Max(100)
-    @NotNull
     private Integer similarity;
 
     @Min(0) @Max(100)
-    @NotNull
     private Integer creativity;
 
     @Min(0) @Max(100)
-    @NotNull
     private Integer feasibility;
 }

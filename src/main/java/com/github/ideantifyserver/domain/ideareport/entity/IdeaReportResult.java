@@ -22,12 +22,10 @@ public class IdeaReportResult extends BaseSchema {
     @Valid
     EvaluationScores evaluationScores;
 
-    @Column(nullable = false)
-    @NotNull
+    @Column
     Integer totalSimilarCases;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    @NotBlank
+    @Column(columnDefinition = "TEXT")
     String analysisNarrative;
 
     @OneToOne(fetch = FetchType.LAZY)
