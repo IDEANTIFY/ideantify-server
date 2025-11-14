@@ -40,4 +40,9 @@ public class ChatRoom extends BaseSchema {
         DEVELOP,
         IDEA_REPORT
     }
+
+    // 비즈니스 메서드
+    public void updateTitle(String title) {
+        this.title = title;
+    }
 }

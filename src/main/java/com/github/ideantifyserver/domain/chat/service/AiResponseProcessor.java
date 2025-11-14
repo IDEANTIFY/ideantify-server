@@ -31,10 +31,7 @@ public class AiResponseProcessor {
 
         // title 업데이트 (채팅방 생성 시)
         if (response.getTitle() != null && !response.getTitle().isEmpty()) {
-            ChatRoom updatedRoom = chatRoom.toBuilder()
-                    .title(response.getTitle())
-                    .build();
-            chatRoomRepository.save(updatedRoom);
+            chatRoom.updateTitle(response.getTitle());
         }
 
         // AI 메시지 저장
