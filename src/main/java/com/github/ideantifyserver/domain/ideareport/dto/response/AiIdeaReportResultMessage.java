@@ -49,8 +49,22 @@ public class AiIdeaReportResultMessage {
     @NoArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class DetailedReport {
-        String query;
+        ReportQuery query;
         List<ResultItem> detailedResults;
+        Object rawReport;
+    }
+
+    @Data
+    @AllArgsConstructor(staticName = "of")
+    @NoArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ReportQuery {
+        String differentiation;
+        String purpose;
+        String query;
+        String summary;
+        String target;
+        String technology;
     }
 
     @Data
@@ -59,11 +73,9 @@ public class AiIdeaReportResultMessage {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ResultItem {
         String sourceType;
-        String title;
-        String keyword;
-        String link;
-        String thumbnail;
         String summary;
+        String title;
+        String image;
         Double score;
         String insight;
     }
