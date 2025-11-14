@@ -34,7 +34,7 @@ public class IdeaReportResponseListener {
     private final @Qualifier("sqsObjectMapper") ObjectMapper sqsObjectMapper;
 
     @Transactional
-    @SqsListener("${spring.cloud.aws.sqs.idea-report.response-queue}")
+    @SqsListener("https://sqs.ap-northeast-2.amazonaws.com/749000350951/ideantify-idea-report-response.fifo")
     public void onResponse(Message<String> message) {
         log.info("[SQS] 아이디어 리포트 응답 수신");
 
