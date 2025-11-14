@@ -41,4 +41,10 @@ public class IdeaReportResult extends BaseSchema {
     public void setInput(IdeaReportInput ideaReportInput) {
         this.input = ideaReportInput;
     }
+
+    public void applySummary(EvaluationScores scores, Integer totalSimilarCases, String analysisNarrative) {
+        this.evaluationScores = scores;
+        this.totalSimilarCases = totalSimilarCases;
+        this.analysisNarrative = analysisNarrative;
+    }
 }

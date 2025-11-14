@@ -6,6 +6,7 @@ import com.github.ideantifyserver.domain.ideareport.dto.response.AiIdeaReportRes
 import com.github.ideantifyserver.domain.ideareport.dto.response.IdeaReportResponseDto;
 import com.github.ideantifyserver.domain.ideareport.entity.*;
 import com.github.ideantifyserver.domain.ideareport.repository.IdeaReportInputRepository;
+import com.github.ideantifyserver.domain.ideareport.repository.IdeaReportResultRepository;
 import io.awspring.cloud.sqs.annotation.SqsListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.services.sqs.model.MessageAttributeValue;
 
 import java.util.Comparator;
@@ -27,10 +29,12 @@ import java.util.UUID;
 public class IdeaReportResponseListener {
 
     private final IdeaReportInputRepository inputRepository;
+    private final IdeaReportResultRepository resultRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final @Qualifier("sqsObjectMapper") ObjectMapper sqsObjectMapper;
 
     @SqsListener("https://sqs.ap-northeast-2.amazonaws.com/749000350951/ideantify-idea-report-response.fifo")
+    @Transactional
     public void onResponse(Message<String> message) {
         try {
             log.info("[SQS] 아이디어 리포트 응답 수신: {}", message.toString());
@@ -44,28 +48,21 @@ public class IdeaReportResponseListener {
 
             UUID id = UUID.fromString(attributes.get("id").stringValue());
 
-
             AiIdeaReportResultMessage resultMessage = sqsObjectMapper.readValue(message.getPayload(), AiIdeaReportResultMessage.class);
             AiIdeaReportResultMessage.ReportSummary summary = resultMessage.getSummaryReport().getReportSummary();
             AiIdeaReportResultMessage.EvaluationScoresDto scores = summary.getEvaluationScores();
 
-            IdeaReportInput ideaReportInput = inputRepository.findById(id).orElse(null);
-            if (ideaReportInput == null) {
-                log.warn("응답 수신했지만 id를 못찾음: {}", id);
-                return;
-            }
+            IdeaReportResult result = resultRepository.findById(id).orElse(null);
 
-            IdeaReportResult result = IdeaReportResult.builder()
-                    .evaluationScores(
-                            new EvaluationScores(
-                                    scores.getSimilarity(),
-                                    scores.getCreativity(),
-                                    scores.getFeasibility()
-                            )
-                    )
-                    .totalSimilarCases(summary.getTotalSimilarCases())
-                    .analysisNarrative(summary.getAnalysisNarrative())
-                    .build();
+            result.applySummary(
+                    new EvaluationScores(
+                            scores.getSimilarity(),
+                            scores.getCreativity(),
+                            scores.getFeasibility()
+                    ),
+                    summary.getTotalSimilarCases(),
+                    summary.getAnalysisNarrative()
+            );
 
             resultMessage.getDetailedReport().getDetailedResults().forEach(resultItem -> {
                 IdeaReportResultItem item = IdeaReportResultItem.builder()
@@ -80,17 +77,16 @@ public class IdeaReportResponseListener {
                 result.getIdeaReportResultItems().add(item);
             });
 
-            ideaReportInput.setResult(result);
-            IdeaReportInput saved = inputRepository.save(ideaReportInput);
+            IdeaReportResult save = resultRepository.save(result);
 
             IdeaReportResponseDto responseDto =
                     IdeaReportResponseDto.of(
-                            saved.getId(),
+                            save.getId(),
                             scores.getSimilarity(),
                             scores.getCreativity(),
                             scores.getFeasibility(),
                             summary.getAnalysisNarrative(),
-                            saved.getResult().getIdeaReportResultItems().stream()
+                            save.getIdeaReportResultItems().stream()
                                     .sorted(
                                             Comparator.comparingDouble(
                                                     (IdeaReportResultItem e) -> Double.parseDouble(e.getScore())

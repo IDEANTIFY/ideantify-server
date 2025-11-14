@@ -66,8 +66,13 @@ public class IdeaReportService {
                 .build();
         input = inputRepository.save(input);
 
-        metadataGateway.publish(input.getId(), req, ideaReportResponseQueue);
-        return input.getId();
+        IdeaReportResult result = IdeaReportResult.builder().build();
+
+        result.setInput(input);
+        IdeaReportResult save = resultRepository.save(result);
+
+        metadataGateway.publish(save.getId(), req, ideaReportResponseQueue);
+        return save.getId();
     }
 
     public List<IdeaReportListResponseDto> getIdeaReportList(User user) {
